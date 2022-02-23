@@ -27,14 +27,14 @@
 #-- Säubern der Arbeitsumgebung
 rm(list=ls())
 #-- Definition des Arbeitsverzeichnisses
-# rootDIR enthält nur den Dateipfad, 
+# root_folder enthält nur den Dateipfad, 
 # die Tilde ~ steht dabei für das Nutzer-Home-Verzeichnis unter Windows 
 # üblicherweise Nutzer/Dokumente
 # path.expand() erweitert den relativen Dateipfad 
 # !dir.exists() überprüft ob der Pfad bereits existiert damit er falls nein angelegt werden kann
-rootDIR=path.expand("~/Desktop/lehre/MHG_2021/sitzung2/")
-if (!dir.exists(rootDIR)) dir.create(path.expand(rootDIR))
-setwd(rootDIR)
+root_folder=path.expand("~/Desktop/lehre/MHG_2021/sitzung2/")
+if (!dir.exists(root_folder)) dir.create(path.expand(root_folder))
+setwd(root_folder)
 
 # --- Schritt 1 Download und Vorbereitung der Mikrozensus Daten
 # # Schalter auswahl = "mikrozensus"

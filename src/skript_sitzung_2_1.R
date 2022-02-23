@@ -37,24 +37,24 @@
 
 #-- Säubern der Arbeitsumgebung
 rm(list=ls())
-# rootDIR enthält nur den Dateipfad, 
-# die Tilde ~ steht dabei für das Nutzer-Home-Verzeichnis unter Windows 
-# üblicherweise Nutzer/Dokumente
-# path.expand() erweitert den relativen Dateipfad 
-# !dir.exists() überprüft ob der Pfad bereits existiert damit er falls nein angelegt werden kann
-rootDIR=path.expand("~/Desktop/lehre/MHG_2021/sitzung2/")
-if (!dir.exists(rootDIR)) dir.create(path.expand(rootDIR))
-setwd(rootDIR)
+# root_folder enthält nur den Dateipfad, 
+library(envimaR)
+library(rprojroot)
+appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
+root_folder = paste0(find_rstudio_root_file(),"/")
+
+source(file.path(root_folder, "src/functions/000_setup.R"))
+
 # --- Schritt 1 Download und Vorbereitung der Mikrozensus Daten
 # # Schalter auswahl = "mikrozensus"
 auswahl = "mikrozensus"
 mz_read=FALSE
-source(paste("../skript_sitzung_2_0.R"))
+source(paste("src/skript_sitzung_2_0.R"))
 
 # --- Schritt 2 Download und Vorbereitung der Geometriedaten
 # Schalter auswahl = "NUTS"
 auswahl = "NUTS"
-source(paste("../skript_sitzung_2_0.R"))
+source(paste("src/skript_sitzung_2_0.R"))
 
 # ---- Start Datenmanipulation und Analyse
 #- 
@@ -64,8 +64,8 @@ source(paste("../skript_sitzung_2_0.R"))
 # ------------
 
 # ACHTUNG die aktuelle Datei ist > 10 GB!
-mydb <- dbConnect(RSQLite::SQLite(), paste0(rootDIR,"mikrozensus2011_BD_2.sqlite"),cache_size = "2000000")
-dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(paste0(rootDIR,"Zensus_Bevoelkerung_100m-Gitter.csv")))
+mydb <- dbConnect(RSQLite::SQLite(), paste0(root_folder,"mikrozensus2011_BD_2.sqlite"),cache_size = "2000000")
+dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(paste0(root_folder,"Zensus_Bevoelkerung_100m-Gitter.csv")))
 dbWriteTable(mydb, "mz_demografie_2011", data.table::fread(fn[1]))
 
 
@@ -123,7 +123,7 @@ mz_2011_BD = gb_link %>%
 # Projizieren der Gemeinden auf 3035
 gemeinden_sf_3035 = st_transform(gemeinden_sf, 3035)
 # Zuschneiden der Gemeindedaten auf Kreis MRBiko 06=Hessen 5=RPGiessen 34=MRBiko
-MRBiKo_3035 = st_crop( gemeinden_sf_3035 %>% filter(substr(AGS,1,5)=="06534"),gemeinden_sf_3035)
+MRBiKo_3035 = st_crop( gemeinden_sf_3035 %>% filter(substr(AGSi,1,5)=="06534"),gemeinden_sf_3035)
 # Grobe Filterung der Datentabelle auf das umlaufende Rechteck der Ausdehnung MRBiKo
 MR_mz_2011_BD = mz_2011_BD %>% filter(x_mp_100m >=st_bbox(MRBiKo_3035)[1] & x_mp_100m <= st_bbox(MRBiKo_3035)[3] & y_mp_100m >= st_bbox(MRBiKo_3035)[2] & y_mp_100m <= st_bbox(MRBiKo_3035)[4] )
 
@@ -138,7 +138,7 @@ MR_mz_2011_BD_sf_3035 = sf::st_as_sf(MR_mz_2011_BD ,
 MRBiKo_mz_2011_BD_sf_3035 = st_intersection(MR_mz_2011_BD,MRBiKo_3035)
 
 # Öffnen der Datenbank
-mydb <- dbConnect(RSQLite::SQLite(), paste0(rootDIR,"mikrozensus2011_BD.sqlite"),cache_size = "2000000")
+mydb <- dbConnect(RSQLite::SQLite(), paste0(root_folder,"mikrozensus2011_BD.sqlite"),cache_size = "2000000")
 sf::dbWriteTable(mydb, value=MRBiKo_mz_2011_BD_sf_3035, name = "MRBiKo_mz_2011_BD_sf_3035")
 # Lesen aus der DB
 MRBiKo =  read_sf(mydb, "MRBiKo_mz_2011_BD_sf_3035")

@@ -109,13 +109,13 @@ if ( auswahl=="mikrozensus"){
   # Download und Entpacken der Mikrozensus 2011 Daten. Geht natürlich auch manuell
   for (mzu in url){
     # Download hierzu wird die URL aus der Liste einzeln in der Variable mzu verwendet der Ausgabedateiname wird durch paste0(...) erzeugt
-    if (!file.exists( paste0(rootDIR,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip")))
-    res  =  curl::curl_download(mzu, paste0(rootDIR,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip"), quiet = FALSE)
+    if (!file.exists( paste0(root_folder,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip")))
+    res  =  curl::curl_download(mzu, paste0(root_folder,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip"), quiet = FALSE)
     # Das Entpacken muss evtl. manuell durchgeführt werden hier wird mit 7zip gearbeitet, das auf dem OS installiert sein muss
     print("Das Entpacken muss evtl. von Hand durchgeführt werden, \nda je nach Betriebssystem > 4GB Darteien von R nicht korrekt entpackt werden können\nund daher 7zip installiert sein muss")
     # Entzippen hier mit einem sogenannten Kommandozeilen-Aufruf über die Funktion system() 
     # Der zusammengesetzte Textstring paste(...) ist ein Befehlsaufruf der in der Shell die externe Software 7zip startet
-    system(paste0("7z e -o.", " ", paste0(rootDIR,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip")),
+    system(paste0("7z e -o.", " ", paste0(root_folder,strsplit(basename(mzu),".",fixed=TRUE)[[1]][1],".zip")),
            intern = FALSE,
            ignore.stdout = FALSE,
            ignore.stderr = TRUE,
@@ -130,7 +130,7 @@ if ( auswahl=="mikrozensus"){
   # Die Dateien sind z.T. > 5 GB daher ist ein extrem schnelles Einlesen der Daten mit data.table zwingend
   # erste Variable Grid-Kodierung + Gesamtbevölkerung
   # erste Datei aus der fn-Liste  Demografie
-  grid_bevoelkerung_2011 = as_tibble(data.table::fread(paste0(rootDIR,"Zensus_Bevoelkerung_100m-Gitter.csv")))
+  grid_bevoelkerung_2011 = as_tibble(data.table::fread(paste0(root_folder,"Zensus_Bevoelkerung_100m-Gitter.csv")))
   mz_demografie_2011 = as_tibble(data.table::fread(fn[1]))
   # kann angepasst werden
   # mz_familie_2011 = as_tibble(data.table::fread(fn[2]))
@@ -141,17 +141,17 @@ if ( auswahl=="mikrozensus"){
   # Die offiziellen Verwaltungsgrenzen für Deutschland werden von der Eurostat vorgehalten. 
   # https://ec.europa.eu/eurostat/de/web/gisco/geodata/reference-data/administrative-units-statistical-units
   # In diesem Falle als sogenanntes GeoJson Format (GDAL kompatibel)
-  if (!file.exists(paste0(rootDIR,"ref-nuts-2016-01m.geojson.zip")))
+  if (!file.exists(paste0(root_folder,"ref-nuts-2016-01m.geojson.zip")))
   download(url = "https://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/nuts/download/ref-nuts-2016-01m.geojson.zip",
-           destfile = paste0(rootDIR,"ref-nuts-2016-01m.geojson.zip")) 
+           destfile = paste0(root_folder,"ref-nuts-2016-01m.geojson.zip")) 
   # Entpacken des Archivs 
   # ACHTUNG die korrekte Archiv-Datei "ref-nuts-2016-01m.geojson.zip" wurde 
   # anhand der Datenbeschreibung manuell identifiziert
-  unzip(zipfile = paste0(rootDIR,"ref-nuts-2016-01m.geojson.zip"),
-        exdir = rootDIR, 
+  unzip(zipfile = paste0(root_folder,"ref-nuts-2016-01m.geojson.zip"),
+        exdir = root_folder, 
         overwrite = TRUE)
   # mit dem Paket sf und der Funktion sf_read lesen wir sie in eine Variable
-  nuts3 = st_read(paste0(rootDIR,"NUTS_RG_01M_2016_3857_LEVL_3.geojson"))
+  nuts3 = st_read(paste0(root_folder,"NUTS_RG_01M_2016_3857_LEVL_3.geojson"))
   # Deutschland-Kreise durch data frame Filterung auf Wert "DE" in Spalte CNTR_CODE
   nuts3_de = nuts3[nuts3$CNTR_CODE=="DE",]
   # Projektion der Geometriedaten von Pseudo-Merkator 3857 in ETRS89-extended / LAEA Europe 3035
@@ -159,20 +159,20 @@ if ( auswahl=="mikrozensus"){
   
   # ---- Offizielle Zuweisungstabellen für Lokale Verwaltungseinheiten (LAU)  = > NUTS3 Konversion (eurostat)
   # https://ec.europa.eu/eurostat/de/web/nuts/local-administrative-units
-  if (!file.exists(paste0(rootDIR,"EU-28-LAU-2019-NUTS-2016.xlsx")))
+  if (!file.exists(paste0(root_folder,"EU-28-LAU-2019-NUTS-2016.xlsx")))
   download(url = "https://ec.europa.eu/eurostat/documents/345175/501971/EU-28-LAU-2019-NUTS-2016.xlsx",
-           destfile =paste0(rootDIR,"EU-28-LAU-2019-NUTS-2016.xlsx"))
+           destfile =paste0(root_folder,"EU-28-LAU-2019-NUTS-2016.xlsx"))
   # Einlesen der xlsx Exceldatei (Daten für Deutschland sind im Datenblatt (=sheet) "DE")
-  conv_lau_nuts3 = readxl::read_xlsx(path.expand(paste0(rootDIR,"EU-28-LAU-2019-NUTS-2016.xlsx")),
+  conv_lau_nuts3 = readxl::read_xlsx(path.expand(paste0(root_folder,"EU-28-LAU-2019-NUTS-2016.xlsx")),
                                      sheet = "DE")
   
   # ----  Offizielle Geometriedaten der Gemeindeflächen  (Bundesamt für Geodäsie und Kartographie)
   # https://gdz.bkg.bund.de/index.php/default/open-data/verwaltungsgebiete-1-250-000-mit-einwohnerzahlen-ebenen-stand-31-12-vg250-ew-ebenen-31-12.html
-  if (!file.exists(paste0(rootDIR,"gemeinden.zip")))
+  if (!file.exists(paste0(root_folder,"gemeinden.zip")))
   download(url ="https://daten.gdz.bkg.bund.de/produkte/vg/vg250-ew_ebenen_1231/aktuell/vg250-ew_12-31.tm32.shape.ebenen.zip",
-           destfile = paste0(rootDIR,"gemeinden.zip"))
+           destfile = paste0(root_folder,"gemeinden.zip"))
   # Entpackt werden nur die benötigten Dateien (da es das SHP-Format handelt sind es mindestens 3 + Projektion also diese vier)
-  unzip(zipfile = paste0(rootDIR,"gemeinden.zip"),
+  unzip(zipfile = paste0(root_folder,"gemeinden.zip"),
         files = c("vg250-ew_12-31.tm32.shape.ebenen/vg250-ew_ebenen_1231/VG250_GEM.shp",
                   "vg250-ew_12-31.tm32.shape.ebenen/vg250-ew_ebenen_1231/VG250_GEM.dbf",
                   "vg250-ew_12-31.tm32.shape.ebenen/vg250-ew_ebenen_1231/VG250_GEM.shx",
@@ -285,12 +285,12 @@ if ( auswahl=="mikrozensus"){
   # und für jede Kategorie: [[1]] heisst also für Kategorie 1 = Beschäftigung
   for (u in url_gemeinde_liste[[1]]){
     # Check ob die Datei bereits existiert falls nicht download
-    if (!file.exists(gsub("\\+","_",paste0(rootDIR,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx"))))
-      download.file(url = u,destfile =  gsub("\\+","_",paste0(rootDIR,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx")),quiet = FALSE,overwrite=TRUE)
+    if (!file.exists(gsub("\\+","_",paste0(root_folder,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx"))))
+      download.file(url = u,destfile =  gsub("\\+","_",paste0(root_folder,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx")),quiet = FALSE,overwrite=TRUE)
     # Hier kann in Sekunden eine Wartezeit angegeben werden um den Server nicht zu überlasten
     # waiting(runif(1, 5. , 15.))
     # Einlesen der Daten
-    data=readxl::read_xlsx(gsub("\\+","_",paste0(rootDIR,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx")), skip = 12, guess_max = 10)
+    data=readxl::read_xlsx(gsub("\\+","_",paste0(root_folder,strsplit(basename(u),".",fixed=TRUE)[[1]][1],".xlsx")), skip = 12, guess_max = 10)
     # Löschen der Tausendertrennung
     data=as_tibble(do.call(cbind,(lapply(data, function(x) { gsub("\\.", "",x)}))))
     # Ersetzen Komma durch Punkt (Dezimaltrennung)
@@ -317,5 +317,5 @@ if ( auswahl=="mikrozensus"){
     i=i+1
   }
   # Ausschreiben der Daten in eine CSV Datei die den Kategoriennamen enthält
-  data.table::fwrite(gemeinde_tab_all,gsub("\\+","_",paste0(rootDIR,kategorien[1],"_gemeinde_daten_bertelsmann_hessen.csv")))
+  data.table::fwrite(gemeinde_tab_all,gsub("\\+","_",paste0(root_folder,kategorien[1],"_gemeinde_daten_bertelsmann_hessen.csv")))
 }

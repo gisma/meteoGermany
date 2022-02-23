@@ -3,11 +3,8 @@
 #' @description Use this script for controlling the processing.
 #'
 #' @author [name], [email@com]
-#' Partly the code is taken from
-#' Hartmann, K., Krois, J., Waske, B. (2018): E-Learning Project SOGA: Statistics and Geospatial Data Analysis. Department of Earth Sciences, Freie Universitaet Berlin.
-#' https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/time-series-analysis/index.html
 
-
+#devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
 appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
@@ -19,12 +16,12 @@ crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ell
 epsg=3035
 res=500
 startYear = 2000
-cVar = "TXK"
+cVar = "TNK"
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
 
 ##------------------ day data set
-currentDate ="2019-04-09"
+
 z=1
 for (currentDate in as.character(cVar.sp$MESS_DATUM)) {
     cVar.sp.day = cVar.sp[cVar.sp$MESS_DATUM == as.Date(currentDate),]

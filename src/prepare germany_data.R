@@ -1,3 +1,7 @@
+#' Partly the code is taken from
+#' Hartmann, K., Krois, J., Waske, B. (2018): E-Learning Project SOGA: Statistics and Geospatial Data Analysis. Department of Earth Sciences, Freie Universitaet Berlin.
+#' https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/time-series-analysis/index.html
+
 # Retrieve Federal States by the the getData() function from the raster package
 cat("getting mask data\n")
 germany <- getData(country = "Germany", level = 1)
@@ -22,7 +26,7 @@ cat("getting srtm data\n")
  # download.file(download.url,zipfile, mode = "wb")))
  # unzip(zipfile,exdir = envrmt$path_data_lev0)
  # system('gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -cutline /home/creu/projects/meteoGermany/data/data_lev0/de_4326.shp -cl de_4326 -crop_to_cutline /home/creu/projects/meteoGermany/data/data_lev0/cut_n30e000.tif /home/creu/projects/meteoGermany/data/data_lev0/germany.tif')
- system(paste0("gdalwarp -overwrite -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -tr ",res," ", res, " -tap -cutline ",envrmt$path_data_lev0,"/de_4326.shp -cl de_4326 -crop_to_cutline -multi ",envrmt$path_data_lev0,"/cut_n30e000.tif ", envrmt$path_data_lev0,"/germany.tif"))
+ # system(paste0("gdalwarp -overwrite -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -tr ",res," ", res, " -tap -cutline ",envrmt$path_data_lev0,"/de_4326.shp -cl de_4326 -crop_to_cutline -multi ",envrmt$path_data_lev0,"/cut_n30e000.tif ", envrmt$path_data_lev0,"/germany.tif"))
  srtm.germany = raster( paste0(envrmt$path_data_lev0,"/germany.tif"))
  # cast to SpatialPixelsDataFrame
  srtm.germany.spdf <- as(srtm.germany,
@@ -46,10 +50,11 @@ if (!file.exists(paste0(envrmt$path_data_lev0,"/daily_climate.rds"))){
   lki = msf[year(msf$von_datum) >= startYear ,]$Stations_id
   rainLK <- pbapply::pblapply(1:length(lki), gemeinden_temp)
   gm_tempMax = do.call(rbind,rainLK)
-  names(stations)[1] = "STATIONS_ID"
+  #
 
   # create subset from msf according to the data
   stations = msf[year(msf$von_datum) >= startYear ,]
+  names(stations)[1] = "STATIONS_ID"
   merge = merge(stations,gm_tempMax)
   #st_write(merge,paste0(envrmt$path_data_lev0,"/daily_climate.gpkg"))
   saveRDS(merge,paste0(envrmt$path_data_lev0,"/daily_climate.rds"))

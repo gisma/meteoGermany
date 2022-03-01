@@ -87,7 +87,7 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
   # Geht natürlich auch mit tibble Tabellen Zum Einlesen der Daten als tibble() den Schalter mz_read=TRUE setzen
   # Beide folgenden  Aufrufe sind identisch. Das  %>%  collect() ist notwendig um die Daten physisch in die Variable zu schreiben
 
-  mz_2011_DE = gb_link %>%
+  mz_2011_DE = grid_link %>%
     inner_join(demo_link,by = "Gitter_ID_100m") %>%  collect()
   # mz_2011_BD_2 = inner_join(demo_link,gb_link, by = "Gitter_ID_100m") %>%  collect()
 
@@ -100,12 +100,12 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
                                        agr = "constant")
 
   # Exaktes Zuschneiden auf den Landkreis MRBiKo mit Hilfe von st_intersection()
-  MRBiKo_mz_2011_BD_sf_3035 = st_intersection(MR_mz_2011_BD,MRBiKo_3035)
+  gemeinden_2011_DE_sf = st_intersection(mz_2011_DE,gemeinden_sf_3035)
 
   # Öffnen der Datenbank
 
-  sf::dbWriteTable(mydb, value=MRBiKo_mz_2011_BD_sf_3035, name = "MRBiKo_mz_2011_BD_sf_3035")
+  sf::dbWriteTable(mydb, value=gemeinden_2011_DE_sf, name = "gemeinden_2011_DE_sf")
   # Lesen aus der DB
-  MRBiKo =  read_sf(mydb, "MRBiKo_mz_2011_BD_sf_3035")
+  MRBiKo =  read_sf(mydb, "gemeinden_2011_DE_sf")
   # Schliessen der Datenbank
   dbDisconnect(mydb)

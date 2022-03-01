@@ -31,6 +31,7 @@ for (vc in var_code){
   for (i in 1:length(clim_files)){
     # Calculate data frame of min and max precipitation for all months
     var <- cbind(gemeinden_sf_3035, exactextractr::exact_extract(raster(clim_files[i]), gemeinden_sf_3035, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
+    var$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
     #saveRDS(var,file.path(envrmt$path_data_lev2,vc,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
     write_csv2(st_drop_geometry(var),file.path(envrmt$path_data_lev2,vc,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")))
   }

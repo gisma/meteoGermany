@@ -99,10 +99,13 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
                                        crs = 3035,
                                        agr = "constant")
 
+  # Exaktes Zuschneiden auf den Landkreis MRBiKo mit Hilfe von st_intersection()
+  MRBiKo_mz_2011_BD_sf_3035 = st_intersection(MR_mz_2011_BD,MRBiKo_3035)
 
   # Öffnen der Datenbank
-  sf::dbWriteTable(mydb, value=mz_2011_DE_sf, name = "mz_2011_DE_sf")
+
+  sf::dbWriteTable(mydb, value=MRBiKo_mz_2011_BD_sf_3035, name = "MRBiKo_mz_2011_BD_sf_3035")
   # Lesen aus der DB
-  MRBiKo =  read_sf(mydb, "mz_2011_DE_sf")
+  MRBiKo =  read_sf(mydb, "MRBiKo_mz_2011_BD_sf_3035")
   # Schliessen der Datenbank
   dbDisconnect(mydb)

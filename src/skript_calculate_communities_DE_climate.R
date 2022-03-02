@@ -17,7 +17,7 @@ crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ell
 epsg=3035
 var_code = c("UPM")
 
-gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"gemeinden_DE_3035.rds"))
+gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.rds"))
 #gemeindeliste_comb = readRDS(paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 
 vc=var_code
@@ -26,7 +26,7 @@ vc=var_code
 for (vc in var_code){
   
   # Create list of corresponding files
-  clim_files <- list.files(envrmt$path_data_lev1,vc, paste0("*",vc,"\\.tif$"), full.names = T)
+  clim_files <- list.files(paste0(envrmt$path_data_lev1,"/",vc), paste0("*",vc,"\\.tif$"), full.names = T)
   if (!dir.exists(paste0(envrmt$path_data_lev2,vc)))
     dir.create(file.path(envrmt$path_data_lev2,vc),recursive = TRUE)
   for (i in 1:length(clim_files)){

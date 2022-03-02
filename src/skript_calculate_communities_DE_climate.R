@@ -22,10 +22,11 @@ gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev1,"gemeinden_DE_3035.rds"
 
 vc=var_code
 
-# Sum of defined raster values within the polygon, accounting for coverage fraction
+# calculate var stats for each community
 for (vc in var_code){
-  # Create list of sentinel-2 processed raster files
-  clim_files <- list.files(file.path(envrmt$path_data_lev1,vc), paste0("/*",vc,"\\.tif$"), full.names = T)
+
+  # Create list of corresponding files
+  clim_files <- list.files(envrmt$path_data_lev1, paste0("*",vc,"\\.tif$"), full.names = T)
   if (!dir.exists(paste0(envrmt$path_data_lev2,vc)))
     dir.create(file.path(envrmt$path_data_lev2,vc),recursive = TRUE)
   for (i in 1:length(clim_files)){

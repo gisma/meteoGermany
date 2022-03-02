@@ -57,7 +57,7 @@ unzip(zipfile = paste0(envrmt$path_data,"gemeinden.zip"),
 gemeinden_sf = st_read("gemeinden/VG250_GEM.shp")
 # Projektion der Geometriedaten von ETRS89 / UTM zone 32N (N-E) 3044 in ETRS89-extended / LAEA Europe 3035
 gemeinden_sf_3035 = st_transform(gemeinden_sf, 3035)
-saveRDS(gemeinden_sf_3035,paste0(envrmt$path_data_lev1,"gemeinden_DE_3035.rds"))
+saveRDS(gemeinden_sf_3035,paste0(envrmt$path_data_lev0,"gemeinden_DE_3035.rds"))
 # ---- Offizielle Gemeindeverzeichnisse (Statistische Bundeamt destatis)
 # Die Gemeindeliste wird benötigt um die jeweils gültigen Gemeindenamen mit anderen Datenquellen zu verküpfen
 # Dafür sind teils umfangreiche Säuberungsmaßnahmen notwendig
@@ -82,22 +82,6 @@ gemeinde_liste_NAMES= stringr::str_split(gemeinde_liste_raw[1:nrow(gemeinde_list
 # LAU2 + "normale" Namensliste für späteren Gebrauch
 gemeindeliste_combi=cbind(gemeinde_liste_LAU,gemeinde_liste_NAMES)
 
-saveRDS(gemeindeliste_comb,paste0(envrmt$path_data_lev1,"LAU_Names.rds"))
+saveRDS(gemeindeliste_combi,paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 
 
-altitude <- getData('alt', country = 'BRA')
-
-prec_for_altitude <- exact_extract(prec[[12]], brazil, function(prec, frac, alt) {
-  # ignore cells with unknown altitude
-  prec <- prec[!is.na(alt)]
-  frac <- frac[!is.na(alt)]
-  alt <- alt[!is.na(alt)]
-
-  low <- !is.na(alt) & alt < 500
-  high <- !is.na(alt) & alt >= 500
-
-  data.frame(
-    prec_low_alt = weighted.mean(prec[low], frac[low]),
-    prec_high_alt = weighted.mean(prec[high], frac[high])
-  )
-}, weights = altitude)

@@ -18,7 +18,7 @@ crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ell
 epsg=3035
 
 
-gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev1,"gemeinden_DE_3035.rds"))
+gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"gemeinden_DE_3035.rds"))
 #gemeindeliste_comb = readRDS(paste0(envrmt$path_data_lev1,"LAU_Names.rds"))
 
 # ---- Mikrozensus Daten
@@ -66,10 +66,10 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
 
   # ACHTUNG die aktuelle Datei ist > 10 GB!
   mydb <- DBI::dbConnect(RSQLite::SQLite(), paste0(envrmt$path_data_lev0,"/mikrozensus2011_BD_2.sqlite"),cache_size = "2000000")
-  dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(fn[1]))
-  dbWriteTable(mydb, "mz_demografie_2011", data.table::fread(fn[2]))
-  dbWriteTable(mydb, "mz_familie_2011", data.table::fread(fn[3]))
-  dbWriteTable(mydb, "mz_haushalte_2011", data.table::fread(fn[4]))
+  # dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(fn[1]))
+  # dbWriteTable(mydb, "mz_demografie_2011", data.table::fread(fn[2]))
+  # dbWriteTable(mydb, "mz_familie_2011", data.table::fread(fn[3]))
+  # dbWriteTable(mydb, "mz_haushalte_2011", data.table::fread(fn[4]))
 
 
   # listen aller enthaltenen tables
@@ -90,7 +90,7 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
   mz_2011_DE = grid_link %>%
     inner_join(demo_link,by = "Gitter_ID_100m") %>%  collect()
   # mz_2011_BD_2 = inner_join(demo_link,gb_link, by = "Gitter_ID_100m") %>%  collect()
-
+  dbWriteTable(mydb, "mz_2011_DE", mz_2011_DE)
 
 
   # Konvertieren der Tabelle in einen räumlichen sf Vektordatensatz Projektion 3035
@@ -98,14 +98,30 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
                                        coords = c("x_mp_100m", "y_mp_100m"),
                                        crs = 3035,
                                        agr = "constant")
+  grid.DE <- expand.grid(x = seq(from = round(st_bbox(gemeinden_sf_3035)["xmin"]),
+                                 to = round(st_bbox(gemeinden_sf_3035)["xmax"]),
+                                 by = 100),
+                         y = seq(from = round(st_bbox(gemeinden_sf_3035)["ymin"]),
+                                 to = round(st_bbox(gemeinden_sf_3035)["ymax"]),
+                                 by = 100))
+  coordinates(grid.DE) <- ~x + y
+  crs(grid.DE)=crs
 
-  # Exaktes Zuschneiden auf den Landkreis MRBiKo mit Hilfe von st_intersection()
-  gemeinden_2011_DE_sf = st_intersection(mz_2011_DE,gemeinden_sf_3035)
-
-  # Öffnen der Datenbank
+  # raster
+  template_raster <-grid.DE %>%
+    raster::rasterFromXYZ(
+      crs = crs)
+  values(template_raster)= 1
+  plot(template_raster)
+  writeRaster(template_raster,paste0(envrmt$path_data_lev0,"/raw.tif"),overwrite=T)
+  st_write(gemeinden_sf_3035$SDV_ARS,paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpkg"))
+  mask <- gdalUtils::gdal_rasterize(src_datasource=paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpkg"),
+                                    dst_filename=paste0(envrmt$path_data_lev0,"/raw_.tif"),
+                                    a="ARS",tr= c(100,100),
+                                    output_Raster=TRUE)
+  writeRaster(mask,paste0(envrmt$path_data_lev0,"/raw.tif"),overwrite=T)
+  gemeinden_2011_DE_sf = st_intersection(gemeinden_sf_3035,mz_2011_DE_sf)
 
   sf::dbWriteTable(mydb, value=gemeinden_2011_DE_sf, name = "gemeinden_2011_DE_sf")
-  # Lesen aus der DB
   MRBiKo =  read_sf(mydb, "gemeinden_2011_DE_sf")
-  # Schliessen der Datenbank
   dbDisconnect(mydb)

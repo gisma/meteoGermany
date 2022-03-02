@@ -28,6 +28,7 @@ gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"gemeinden_DE_3035.rds"
 # als x y Spalten in der Refrenzierung ETRS89-extended / LAEA Europe 3035
 # # Bei Bedarf können die auskommentierten URLs aktiviert werden
 # url=list()
+# url$gitter = "https://daten.gdz.bkg.bund.de/produkte/sonstige/geogitter/aktuell/DE_Grid_ETRS89-LAEA_100m.gpkg.zip"
 # url$demo_grund_2011="https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3"
 # url$demographie_2011="https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Demographie_100m_Gitter.zip?__blob=publicationFile&v=2"
 # url$familien_2011="https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Familien_100m_Gitter.zip?__blob=publicationFile&v=2"
@@ -87,11 +88,12 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
   # Geht natürlich auch mit tibble Tabellen Zum Einlesen der Daten als tibble() den Schalter mz_read=TRUE setzen
   # Beide folgenden  Aufrufe sind identisch. Das  %>%  collect() ist notwendig um die Daten physisch in die Variable zu schreiben
 
+  gitter=st_read(paste0(envrmt$path_data_lev0,"/DE_Gitter_ETRS89_LAEA_1km.shp"))
   mz_2011_DE = grid_link %>%
     inner_join(demo_link,by = "Gitter_ID_100m") %>%  collect()
   # mz_2011_BD_2 = inner_join(demo_link,gb_link, by = "Gitter_ID_100m") %>%  collect()
   dbWriteTable(mydb, "mz_2011_DE", mz_2011_DE)
-
+  mz_link  =  tbl(mydb, "mz_2011_DE")
 
   # Konvertieren der Tabelle in einen räumlichen sf Vektordatensatz Projektion 3035
   mz_2011_DE_sf = sf::st_as_sf( mz_2011_DE ,

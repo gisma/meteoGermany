@@ -25,6 +25,7 @@ cVar = "UPM"
 dat_list = sort(as.character(unique(cVar.sp$MESS_DATUM)))[1:1620]
 
 
+
 z=1
 for (currentDate in dat_list) {
     cVar.sp.day = cVar.sp[as.character(unique(cVar.sp$MESS_DATUM)) == as.Date(currentDate),]

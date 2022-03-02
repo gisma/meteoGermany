@@ -57,7 +57,11 @@ unzip(zipfile = paste0(envrmt$path_data,"gemeinden.zip"),
 gemeinden_sf = st_read("gemeinden/VG250_GEM.shp")
 # Projektion der Geometriedaten von ETRS89 / UTM zone 32N (N-E) 3044 in ETRS89-extended / LAEA Europe 3035
 gemeinden_sf_3035 = st_transform(gemeinden_sf, 3035)
+<<<<<<< HEAD
 saveRDS(gemeinden_sf_3035,paste0(envrmt$path_data_lev0,"gemeinden_DE_3035.rds"))
+=======
+#saveRDS(gemeinden_sf_3035,paste0(envrmt$path_data_lev1,"gemeinden_DE_3035.rds"))
+>>>>>>> 02d2d41f991ef09602f5a13bd8c22c2aaefd4d30
 # ---- Offizielle Gemeindeverzeichnisse (Statistische Bundeamt destatis)
 # Die Gemeindeliste wird benötigt um die jeweils gültigen Gemeindenamen mit anderen Datenquellen zu verküpfen
 # Dafür sind teils umfangreiche Säuberungsmaßnahmen notwendig
@@ -82,6 +86,11 @@ gemeinde_liste_NAMES= stringr::str_split(gemeinde_liste_raw[1:nrow(gemeinde_list
 # LAU2 + "normale" Namensliste für späteren Gebrauch
 gemeindeliste_combi=cbind(gemeinde_liste_LAU,gemeinde_liste_NAMES)
 
+<<<<<<< HEAD
 saveRDS(gemeindeliste_combi,paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 
+=======
+saveRDS(gemeindeliste_combi,paste0(envrmt$path_data_lev1,"LAU_Names.rds"))
+saveRDS(gemeinden_sf_3035,paste0(envrmt$path_data_lev1,"gemeinden_DE_3035.rds"))
+>>>>>>> 02d2d41f991ef09602f5a13bd8c22c2aaefd4d30
 

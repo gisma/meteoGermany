@@ -19,14 +19,15 @@ startYear = 2000
 
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
-cVar = "TXK"
+cVar = "UPM"
 ##------------------ day data set
 
-dat_list = as.character(cVar.sp$MESS_DATUM)[6000:length(unique(cVar.sp$MESS_DATUM))]
+dat_list = sort(as.character(unique(cVar.sp$MESS_DATUM)))[1:1620]
+
 
 z=1
 for (currentDate in dat_list) {
-    cVar.sp.day = cVar.sp[cVar.sp$MESS_DATUM == as.Date(currentDate),]
+    cVar.sp.day = cVar.sp[as.character(unique(cVar.sp$MESS_DATUM)) == as.Date(currentDate),]
     cVar.sp.day <- spatialEco::sp.na.omit(cVar.sp.day,cVar)
     cd= substr(currentDate,1,10)
     cVar.sp.day
@@ -92,7 +93,7 @@ for (currentDate in dat_list) {
     # plot(ev.anis, vm.gau)
     #
     # vm.anis <-  vgm(psill = 7.6086173,
-    #                 model = "Exp",
+     #                 model = "Exp",
     #                 range = 131529.2,
     #                 nugget = 0.9792447,
     #                 anis = c(0, 1))

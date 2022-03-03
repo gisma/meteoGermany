@@ -15,23 +15,25 @@ source(file.path(root_folder, "src/functions/000_setup.R"))
 crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")
 epsg=3035
 res=500
-startYear = 2000
-type= "recent"
-
+startDate = "2000-01-01"
+endDate = "2022-03-01"
+type= "recent" #"historical"
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
-cVar = "TNK"
-##------------------ day data set
+cVar = "PM"
 
-dat_list = as.character(cVar.sp$MESS_DATUM)[5001:6500]
+##------------------ day data set
+dat_list = sort(as.character(unique(cVar.sp$MESS_DATUM)))
 
 z=1
 for (currentDate in dat_list) {
-    cVar.sp.day = cVar.sp[cVar.sp$MESS_DATUM == as.Date(currentDate),]
+  cd= substr(currentDate,1,10)
+  if(!file.exists(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))){
+    cVar.sp.day = cVar.sp[as.character(unique(cVar.sp$MESS_DATUM)) == as.Date(currentDate),]
     cVar.sp.day <- spatialEco::sp.na.omit(cVar.sp.day,cVar)
-    cd= substr(currentDate,1,10)
+    
     cVar.sp.day
-    cat(cd, " date ",z, " von ",length(dat_list),"\n")
+    cat(cVar," ",cd, " date ",z, " von ",length(dat_list),"\n")
     # tune idw model
     # set parameter
     # # neighbors = length(cVar.sp.day)-1
@@ -93,7 +95,7 @@ for (currentDate in dat_list) {
     # plot(ev.anis, vm.gau)
     #
     # vm.anis <-  vgm(psill = 7.6086173,
-    #                 model = "Exp",
+     #                 model = "Exp",
     #                 range = 131529.2,
     #                 nugget = 0.9792447,
     #                 anis = c(0, 1))
@@ -118,7 +120,8 @@ for (currentDate in dat_list) {
                        model = vm.auto$var_model,
                        debug.level=0)
 
-    writeRaster(raster(tmax.pred, layer=1, values=TRUE),paste0(envrmt$path_data_lev1,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
+    writeRaster(raster(tmax.pred, layer=1, values=TRUE),paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
+    }
     z=z+1
 }
 

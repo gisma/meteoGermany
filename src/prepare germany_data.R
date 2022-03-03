@@ -38,29 +38,30 @@ colnames(srtm.germany.spdf@data) <- 'Stationshoehe'
 
 ######
 cat("getting Variable data\n")
-if (!file.exists(paste0(envrmt$path_data_lev0,"/daily_climate.rds"))){
+if (!file.exists(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))){
   # Select daily climate data:
   data("metaIndex")
   m <- metaIndex
-  m <- m[m$res=="daily" & m$var=="kl" & (m$per=="historical") & m$hasfile, ]
+  m <- m[m$res=="daily" & m$var=="kl" & (m$per==type) & m$hasfile, ]
 
   # Transform into spatial object:
   msf <- sf::st_as_sf(m, coords=c("geoLaenge", "geoBreite"), crs=4326)
   # extract station ids for station after startYear
-  lki = msf[year(msf$von_datum) >= startYear ,]$Stations_id
+  #lki = msf[as.Date(msf$von_datum,,"%Y-%m-%d") >= as.Date(startJahr,"%Y-%m-%d") ,]$Stations_id
+  lki=msf$Stations_id
   rainLK <- pbapply::pblapply(1:length(lki), gemeinden_temp)
   gm_tempMax = do.call(rbind,rainLK)
   #
 
   # create subset from msf according to the data
-  stations = msf[year(msf$von_datum) >= startYear ,]
+  stations = msf[year(msf$von_datum) <= endDate ,]
   names(stations)[1] = "STATIONS_ID"
   merge = merge(stations,gm_tempMax)
   #st_write(merge,paste0(envrmt$path_data_lev0,"/daily_climate.gpkg"))
-  saveRDS(merge,paste0(envrmt$path_data_lev0,"/daily_climate.rds"))
-} else{
-  cVar.sf = readRDS(paste0(envrmt$path_data_lev0,"/daily_climate.rds"))
-}
+  saveRDS(merge,paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
+} 
+  cVar.sf = readRDS(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
+
 # transform to UTM zone 33
 cVar.sf <- st_transform(cVar.sf, crs)
 cVar.sp <- as(cVar.sf, 'Spatial')

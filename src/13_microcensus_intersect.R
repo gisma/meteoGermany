@@ -13,10 +13,9 @@ appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly"
 root_folder = find_rstudio_root_file()
 source(file.path(root_folder, "src/functions/000_setup.R"))
 
-mz = c("fami") #,"haus") #,"geb","wohn","demo")
-
-for (s_id in state_id){
-  for (mz_id in mz){
+mz = c("haus","demo") #,"geb","wohn","demo", "fami")
+for (mz_id in mz){
+  for (s_id in state_id){
     if (mz_id == "demo"){
       cat(" reading and intersecting the demo data \n")
       mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_mz_state.rds"))
@@ -554,12 +553,7 @@ for (s_id in state_id){
       state_tmp$EWZ = NULL
       state_tmp$KFL = NULL
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_wohn.rds"))
-
-
     }
-
-
   }
 }
-
 #bind_rows(state_tmp,state_tmp)

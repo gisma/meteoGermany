@@ -1,10 +1,16 @@
-split_mz_data = function(poly= NULL,mz_data=NULL,state_id = NULL){
+split_mz_data = function(poly= NULL,mz_data=NULL,state_id = NULL,out_id =NULL){
 for (s_id in state_id){
   # crop to state
-  state = st_crop( gemeinden_sf_3035 %>% filter(substr(AGS,1,2)==s_id),gemeinden_sf_3035)
-  mz_state = st_crop(grid_demo_DE_sf,state)
-  saveRDS(mz_state,paste0(envrmt$path_data_lev0,"/",s_id,"_mz_state.rds"))
-  saveRDS(state,paste0(envrmt$path_data_lev0,"/",s_id,"_state.rds"))
+  if (!file.exists(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds")))
+  {state = st_crop( poly %>% filter(substr(AGS,1,2)==s_id),poly)} else {
+    state= readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
+  }
+  if (!file.exists(paste0(envrmt$path_data_lev1,"/",s_id,"_",out_id,"_state.rds")))
+  mz_state = st_crop(mz_data,state)
+  if (!file.exists(paste0(envrmt$path_data_lev1,"/",s_id,"_",out_id,"_state.rds")))
+  saveRDS(mz_state,paste0(envrmt$path_data_lev1,"/",s_id,"_",out_id,"_state.rds"))
+  if (!file.exists(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds")))
+  saveRDS(state,paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
 }}
 
 cv.IDW  <- function(spatialDF, stat.formula = NULL,

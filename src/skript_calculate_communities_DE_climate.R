@@ -7,20 +7,18 @@
 #devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
-appendpackagesToLoad= c("downloader")
+appendpackagesToLoad= c("downloader","dplyr","readr")
 appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
 root_folder = find_rstudio_root_file()
 
 source(file.path(root_folder, "src/functions/000_setup.R"))
 
-crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")
-epsg=3035
 var_code = c("TXK","TNK","TMK","SDK","PM","UPM")
 
 gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.rds"))
 #gemeindeliste_comb = readRDS(paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 
-vc=var_code
+vc="TXK"
 
 # calculate var stats for each community
 for (vc in var_code){
@@ -37,5 +35,21 @@ for (vc in var_code){
       #saveRDS(var,file.path(envrmt$path_data_lev2,vc,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
       write_csv2(st_drop_geometry(var),file.path(envrmt$path_data_lev2,vc,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")))}
   }
-  
+
+}
+
+
+# depreceated to slow to  memory consuming
+# for (vc in var_code){
+# 
+# df <- sort(list.files(paste0(envrmt$path_data_lev2,"/",vc), paste0("*",vc,"\\.csv$"), full.names = T),decreasing = F) %>% 
+#   lapply(read_csv2) %>% 
+#   bind_rows 
+# write_csv2(df,file.path(envrmt$path_data_lev2,paste0(vc,"_2000-2022.csv")))
+# }
+
+var_code = c("TNK","TMK","SDK")
+for (vc in var_code){
+  system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",vc,"/2000-02-01_",vc,".csv > ",envrmt$path_data_lev2,"/",vc,"/",vc,"_2000-2022.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",vc,"/*",vc,".csv >> ",envrmt$path_data_lev2,"/",vc,"/",vc,"_2000-2022.out"))
+
 }

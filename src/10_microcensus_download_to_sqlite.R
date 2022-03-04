@@ -72,4 +72,4 @@ dbWriteTable(mydb, "mz_haus_2011", data.table::fread(fn[6]))
 
 # listen aller enthaltenen tables
 dbListTables(mydb)
-dbDisconnect()
+DBI::dbDisconnect()

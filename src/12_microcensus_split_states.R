@@ -27,5 +27,6 @@ gemeinden_sf_3035 = st_read(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpk
  grid_mz_DE_sf = readRDS(paste0(envrmt$path_data_lev1,"/grid_","haus","_DE_sf.rds"))
  split_mz_data (poly= gemeinden_sf_3035, mz_data=grid_mz_DE_sf,state_id = state_id,out_id="haus")
 
+# NOT CLEAR WHAT IS THE DIFFERENCE TO WOHN
 ## grid_mz_DE_sf = readRDS(paste0(envrmt$path_data_lev1,"/grid_","geb","_DE_sf.rds"))
 ## split_mz_data (poly= gemeinden_sf_3035, mz_data=grid_mz_DE_sf,state_id = state_id,out_id="geb")

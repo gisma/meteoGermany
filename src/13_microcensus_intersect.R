@@ -18,8 +18,8 @@ mz = c("fami") #,"haus","geb","wohn","demo")
 for (s_id in state_id){
   for (mz_id in mz){
     if (mz_id == "demo"){
-      mz_state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_mz_state.rds"))
-      state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_state.rds"))
+      mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_mz_state.rds"))
+      state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
       ew = st_intersection(mz_state,state)
       # "ALTER_KURZ"
       state_tmp = right_join(st_drop_geometry(ew %>% filter(Einwohner>0 & Merkmal == "ALTER_KURZ" & Auspraegung_Code==1) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state)
@@ -164,12 +164,12 @@ for (s_id in state_id){
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_bevoelkerung.rds"))
     }
     else if (mz_id == "fami"){
-      mz_state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_fami_state.rds"))
-      state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_state.rds"))
+      mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_fami_state.rds"))
+      state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
       ew = st_intersection(mz_state,state)
 
       # INSGESAMT 0
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state)
       names(state_tmp)[19] = "GES_0"
       # FAMTYP_KIND 1  2  3  4  5  6  7  8  9 10 11 12 13
       state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "FAMTYP_KIND" & Auspraegung_Code==1) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state_tmp)
@@ -220,12 +220,12 @@ for (s_id in state_id){
 
     }
     else if (mz_id == "haus"){
-      mz_state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_haus_state.rds"))
-      state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_state.rds"))
+      mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_haus_state.rds"))
+      state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
       ew = st_intersection(mz_state,state)
 
       # INSGESAMT 0
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state)
       names(state_tmp)[19] = "GEH_0"
 
       # HHTYP_FAM  1  2  3  4  5
@@ -275,12 +275,12 @@ for (s_id in state_id){
 
     }
     else if (mz_id == "wohn"){
-      mz_state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_wohn_state.rds"))
-      state = readRDS(paste0(envrmt$path_data_lev0,"/",s_id,"_state.rds"))
+      mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_wohn_state.rds"))
+      state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
       ew = st_intersection(mz_state,state)
 
 
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "INSGESAMT" & Auspraegung_Code==0) %>% count(ADE,GF,BSG,ARS,AGS,SDV_ARS,GEN,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID)),state)
       names(state_tmp)[19] = "GEW_0"
 
       # NUTZUNG_DETAIL_HHGEN 1 11 12 2 21 22 3 4 5 99

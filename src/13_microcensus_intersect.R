@@ -17,6 +17,110 @@ mz = c("haus","demo") #,"geb","wohn","demo", "fami")
 for (mz_id in mz){
   for (s_id in state_id){
     if (mz_id == "demo"){
+      # Statistisches Bundesamt, Zensus 2011
+      # Version 1; 13.02.2018
+      #
+      # Merkmale und Merkmalsausprägungen
+      # Bevölkerung je Hektar
+      # Ergebnisse des Zensus am 9. Mai 2011 in Gitterzellen
+      #
+      # Hier werden die Ausprägungen der einzelnen Merkmale aufgelistet.
+      # Ausführliche Merkmalsdefinitionen sind auf dem Tabellenblatt "Merkmalsdefinitionen" zu finden.
+      #
+      #
+      # Merkmal	Code	Text	Erläuterungen
+      #
+      # INSGESAMT			Gesamtzahl der Einheiten in der Gitterzelle
+      # Kann aufgrund der Geheimhaltung  von der Summe über alle Ausprägungen der anderen Merkmale abweichen
+      # 0	Einheiten insgesamt
+      #
+      #
+      # ALTER_10JG			Alter (10er-Jahresgruppen)
+      # 1	 Unter 10
+      # 2	 10 - 19
+      # 3	 20 - 29
+      # 4	 30 - 39
+      # 5	 40 - 49
+      # 6	 50 - 59
+      # 7	 60 - 69
+      # 8	 70 - 79
+      # 9	 80 und älter
+      #
+      #
+      # ALTER_KURZ			Alter (5 Altersklassen)
+      # 1	Unter 18
+      # 2	18 - 29
+      # 3	30 - 49
+      # 4	50 - 64
+      # 5	65 und älter
+      #
+      #
+      # FAMSTND_AUSF			Familienstand (ausführlich)
+      # 1	Ledig
+      # 2	Verheiratet
+      # 3	Verwitwet
+      # 4	Geschieden
+      # 5	Eingetr. Lebenspartnerschaft
+      # 6	Eingetr. Lebensparter/-in verstorben
+      # 7	Eingetr. Lebenspartnerschaft aufgehoben
+      # 8	Ohne Angabe
+      #
+      #
+      # GEBURTLAND_GRP			Geburtsland (Gruppen)
+      # 1	Deutschland
+      # 21	EU27-Land
+      # 22	Sonstiges Europa
+      # 23	Sonstige Welt
+      # 24	Sonstige
+      #
+      #
+      # GESCHLECHT			Geschlecht
+      # 1	Männlich
+      # 2	Weiblich
+      #
+      #
+      # RELIGION_KURZ			Religion
+      # 1	Römisch-katholische Kirche (öffentlich-rechtlich)
+      # 2	Evangelische Kirche (öffentlich-rechtlich)
+      # 3	Sonstige, keine, ohne Angabe
+      #
+      #
+      # STAATSANGE_GRP			Staatsangehörigkeitsgruppen
+      # 1	Deutschland
+      # 21	EU27-Land
+      # 22	Sonstiges Europa
+      # 23	Sonstige Welt
+      # 24	Sonstiges
+      #
+      #
+      # STAATSANGE_HLND			Staatsangehörigkeit nach ausgewählten Ländern
+      # 1	Deutschland
+      # 2	Bosnien und Herzegowina
+      # 3	Griechenland
+      # 4	Italien
+      # 5	Kasachstan
+      # 6	Kroatien
+      # 7	Niederlande
+      # 8	Österreich
+      # 9	Polen
+      # 10	Rumänien
+      # 11	Russ. Föderation
+      # 12	Türkei
+      # 13	Ukraine
+      # 14	Sonstige
+      #
+      #
+      # STAATSANGE_KURZ			Staatsangehörigkeit
+      # 1	Deutschland
+      # 2	Ausland
+      #
+      #
+      # STAATZHL			Zahl der Staatsangehörigkeiten
+      # 1	Eine Staatsangehörigkeit
+      # 2	Mehrere, deutsch und ausländisch
+      # 3	Mehrere, nur ausländisch
+      # 4	Nicht bekannt
+
       cat(" reading and intersecting the demo data \n")
       mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_mz_state.rds"))
       state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
@@ -175,6 +279,51 @@ for (mz_id in mz){
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_bevoelkerung.rds"))
     }
     else if (mz_id == "fami"){
+      # Statistisches Bundesamt, Zensus 2011
+      # Version 1; 21.11.2017
+      #
+      # Merkmale und Merkmalsausprägungen
+      # Familien je Hektar
+      # Ergebnisse des Zensus am 9. Mai 2011 in Gitterzellen
+      #
+      # Hier werden die Ausprägungen der einzelnen Merkmale aufgelistet.
+      # Ausführliche Merkmalsdefinitionen sind auf dem Tabellenblatt "Merkmalsdefinitionen" zu finden.
+      #
+      #
+      # Merkmal	Code	Text	Erläuterungen
+      #
+      # INSGESAMT			Gesamtzahl der Einheiten in der Gitterzelle
+      # Kann aufgrund der Geheimhaltung  von der Summe über alle Ausprägungen der anderen Merkmale abweichen
+      # 0	Einheiten insgesamt
+      #
+      #
+      # FAMTYP_KIND			Typ der Kernfamilie (nach Kindern)
+      # 1	Ehepaare ohne Kind
+      # 2	Ehepaare, mind. 1 Kind < 18
+      # 3	Ehepaare alle Kinder ≥ 18
+      # 4	Eingetr. Lebenspartnerschaften ohne Kind
+      # 5	Eingetr. Lebenspartnerschaften mind. 1 Kind < 18
+      # 6	Eingetr. Lebenspartnerschaften alle Kinder ≥ 18
+      # 7	Nichteheliche Lebensgem. ohne Kind
+      # 8	Nichteheliche Lebensgem. mind. 1 Kind < 18
+      # 9	Nichteheliche Lebensgem. alle Kinder ≥ 18
+      # 10	Alleinerziehende Väter mind. 1 Kind < 18
+      # 11	Alleinerziehende Väter alle Kinder ≥ 18
+      # 12	Alleinerziehende Mütter mind. 1 Kind < 18
+      # 13	 Alleinerziehende Mütter alle Kinder ≥ 18
+      #
+      # FAMGROESS_KLASS			Größe der Kernfamilie
+      # 1	2 Personen
+      # 2	3 Personen
+      # 3	4 Personen
+      # 4	5 Personen
+      # 5	6 und mehr Personen
+      #
+      # HHTYP_SENIOR_HH			Seniorenstatus eines privaten Haushalts
+      # 1	Haushalte mit ausschließlich Senioren/-innen
+      # 2	Haushalte mit Senioren/-innen und Jüngeren
+      # 3	Haushalte ohne Senioren/-innen
+
       cat("state ", s_id," ", mz_id," \n")
       cat(" reading and intersecting the fami data \n")
       mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_fami_state.rds"))
@@ -248,6 +397,49 @@ for (mz_id in mz){
 
     }
     else if (mz_id == "haus"){
+      # Statistisches Bundesamt, Zensus 2011
+      # Version 1; 21.11.2017
+      #
+      # Merkmale und Merkmalsausprägungen
+      # Haushalte je Hektar
+      # Ergebnisse des Zensus am 9. Mai 2011 in Gitterzellen
+      #
+      # Hier werden die Ausprägungen der einzelnen Merkmale aufgelistet.
+      # Ausführliche Merkmalsdefinitionen sind auf dem Tabellenblatt "Merkmalsdefinitionen" zu finden.
+      #
+      #
+      # Merkmal	Code	Text	Erläuterungen
+      #
+      # INSGESAMT			Gesamtzahl der Einheiten in der Gitterzelle
+      # Kann aufgrund der Geheimhaltung  von der Summe über alle Ausprägungen der anderen Merkmale abweichen
+      # 0	Einheiten insgesamt
+      #
+      #
+      # HHTYP_FAM			Typ des privaten Haushalts (nach Familien)
+      # 1	Einpersonenhaushalte (Singlehaushalte)
+      # 2	Paare ohne Kind(er)
+      # 3	Paare mit Kind(ern)
+      # 4	Alleinerziehende Elternteile
+      # 5	Mehrpersonenhaushalte ohne Kernfamilie
+      #
+      # HHTYP_LEB			Typ des privaten Haushalts (nach Lebensform)
+      # 1	Einpersonenhaushalte (Singlehaushalte)
+      # 2	Ehepaare
+      # 3	Eingetr. Lebenspartnerschaften
+      # 4	 Nichteheliche Lebensgemeinschaften
+      # 5	Alleinerziehende Mütter
+      # 6	Alleinerziehende Väter
+      # 7	Mehrpersonenhaushalte ohne Kernfamilie
+      #
+      # HHGROESS_KLASS			Größe des privaten Haushalts
+      # 1	1 Person
+      # 2	2 Personen
+      # 3	3 Personen
+      # 4	4 Personen
+      # 5	5 Personen
+      # 6	6 und mehr Personen
+
+
       cat(" reading and intersecting the haus data \n")
       mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_haus_state.rds"))
       state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))
@@ -317,6 +509,132 @@ for (mz_id in mz){
 
     }
     else if (mz_id == "wohn"){
+      # Wohnungen und Gebäude je Hektar
+      # Ergebnisse des Zensus am 9. Mai 2011 in Gitterzellen
+      #
+      # Hier werden die Ausprägungen der einzelnen Merkmale aufgelistet.
+      # Ausführliche Merkmalsdefinitionen sind auf dem Tabellenblatt "Merkmalsdefinitionen" zu finden.
+      #
+      #
+      # Merkmal	Code	Text	Erläuterungen
+      #
+      # INSGESAMT			Gesamtzahl der Einheiten in der Gitterzelle
+      # Kann aufgrund der Geheimhaltung  von der Summe über alle Ausprägungen der anderen Merkmale abweichen
+      # 0	Einheiten insgesamt
+      #
+      #
+      # NUTZUNG _DETAIL_HHGEN			Nutzung nach Belegung durch Haushalt
+      # 1	 Von Eigentümer/-in bewohnt
+      # 11	 Eigentum: mit aktuell geführtem Haushalt
+      # 12	 Eigentum: ohne aktuell geführtem Haushalt
+      # 2	 Zu Wohnzwecken vermietet
+      # 21	 Vermietet: mit aktuell geführtem Haushalt
+      # 22	 Vermietet: ohne aktuell geführtem Haushalt
+      # 3	 Ferien- und Freizeitwohnung
+      # 4	 Leer stehend
+      # 5	 Diplomaten-/Streitkräftewohnung
+      # 99	 Gewerbl. Nutzung
+      #
+      # WOHNEIGENTUM			Eigentumsverhältnisse der Wohnung
+      # 1	 Privatperson/-en
+      # 2	 Privatwirtschaftliche Unternehmen (jur. Personen)
+      # 3	 Öffentliche Unternehmen, Kirchen o.ä.
+      # 4	 Wohnungsgenossenschaft
+      # 99	 Trifft nicht zu (da keine Eigentumswohnung)
+      #
+      # WOHNFLAECHE_10S			Fläche der Wohnung (10m2 Intervalle)
+      # 01	Unter 30
+      # 02	30 - 39
+      # 03	40 - 49
+      # 04	50 - 59
+      # 05	60 - 69
+      # 06	70 - 79
+      # 07	80 - 89
+      # 08	90 - 99
+      # 09	100 - 109
+      # 10	110 - 119
+      # 11	120 - 129
+      # 12	130 - 139
+      # 13	140 - 149
+      # 14	150 - 159
+      # 15	160 -169
+      # 16	170 - 179
+      # 17	180 und mehr
+      # 99	t.n.z., gewerblich
+      #
+      # RAUMANZAHL			Zahl der Räume
+      # 1	 1 Raum
+      # 2	 2 Räume
+      # 3	 3 Räume
+      # 4	 4 Räume
+      # 5	 5 Räume
+      # 6	 6 Räume
+      # 7	 7 und mehr Räume
+      # 99	 t.n.z., gewerblich
+      #
+      # GEBAEUDEART_SYS			Art des Gebäudes
+      # 1	 Gebäude mit Wohnraum
+      # 11	 Wohngebäude
+      # 111	 Wohngebäude (ohne Wohnheime)
+      # 112	 Wohnheim
+      # 12	 Sonstiges Gebäude mit Wohnraum
+      #
+      # BAUJAHR_MZ			Baujahr (Mikrozensus-Klassen)
+      # 1	 Vor 1919
+      # 2	 1919 - 1948
+      # 3	 1949 - 1978
+      # 4	 1979 - 1986
+      # 5	 1987 - 1990
+      # 6	 1991 - 1995
+      # 7	 1996 - 2000
+      # 8	 2001 - 2004
+      # 9	 2005 - 2008
+      # 10	 2009 und später
+      #
+      # EIGENTUM			Eigentumsform des Gebäudes
+      # 1	 Gemeinschaft von Wohnungseigentümern/-innen
+      # 2	 Privatperson/en
+      # 3	 Wohnungsgenossenschaft
+      # 4	 Kommune oder Kommunales Wohnungsunternehmen
+      # 5	 Privatwirtschaftliches Wohnungsunternehmen
+      # 6	 Anderes privatwirtschaftliches Unternehmen
+      # 7	 Bund oder Land
+      # 8	 Organisation ohne Erwerbszweck (z.B. Kirche)
+      #
+      # GEBTYPBAUWEISE			Gebäudetyp-Bauweise
+      # 1	 Freistehendes Haus
+      # 2	 Doppelhaus hälfte
+      # 3	 Gereihtes Haus
+      # 4	 Anderer Gebäudetyp
+      #
+      # GEBTYPGROESSE			Gebäudetyp-Größe
+      # 1	 Freistehendes Einfamilienhaus
+      # 2	 Einfamilienhaus: Doppelhaushälfte
+      # 3	 Einfamilienhaus: Reihenhaus
+      # 4	 Freistehendes Zweifamilienhaus
+      # 5	 Zweifamilienhaus: Doppelhaushälfte
+      # 6	 Zweifamilienhaus: Reihenhaus
+      # 7	 Mehrfamilienhaus: 3-6 Wohnungen
+      # 8	 Mehrfamilienhaus: 7-12 Wohnungen
+      # 9	 Mehrfamilienhaus: 13 und mehr Wohnungen
+      # 10	 Anderer Gebäudetyp
+      #
+      # HEIZTYP			Heizungsart
+      # 1	 Fernheizung (Fernwärme)
+      # 2	 Etagenheizung
+      # 3	 Blockheizung
+      # 4	 Zentralheizung
+      # 5	 Einzel-/Mehrraumöfen (auch Nachtspeicherheizung)
+      # 6	 Keine Heizung im Gebäude oder in den Wohnungen
+      #
+      # ZAHLWOHNGN_HHG			Zahl der Wohnungen im Gebäude
+      # 1	 1 Wohnung
+      # 2	 2 Wohnungen
+      # 3	 3 - 6 Wohnungen
+      # 4	 7 - 12 Wohnungen
+      # 5	 13 und mehr Wohnungen
+
+
       cat(" reading and intersecting the wohn data \n")
       mz_state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_wohn_state.rds"))
       state = readRDS(paste0(envrmt$path_data_lev1,"/",s_id,"_state.rds"))

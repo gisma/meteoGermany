@@ -7,13 +7,10 @@
 #devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
-library(DBI)
-appendpackagesToLoad= c("downloader")
-appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
 root_folder = find_rstudio_root_file()
 source(file.path(root_folder, "src/functions/000_setup.R"))
 
-mz = c("demo","fami","haus","wohn")
+mz = c("wohn")#,"fami","haus","wohn")
 for (mz_id in mz){
   for (s_id in state_id){
     if (mz_id == "demo"){
@@ -145,21 +142,21 @@ for (mz_id in mz){
       cat("ALTER LANG \n")
       state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_u10")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==2) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_10_19")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==3) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_20_29")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==4) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_30_39")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==5) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_40_49")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==6) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_50_59")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==7) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_60_69")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==8) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_70_79")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter( Merkmal == "ALTER_10JG" & Auspraegung_Code==9) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "A_p80")
 
       # FAMSTND_AUSF 1 2 3 4 5 6 7 8
@@ -279,6 +276,8 @@ for (mz_id in mz){
       state_tmp$EWZ = NULL
       state_tmp$KFL = NULL
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_bevoelkerung.rds"))
+      state_tmp$geom =NULL
+      utils::write.csv2(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_bevoelkerung.csv"))
     }
     else if (mz_id == "fami"){
       # Statistisches Bundesamt, Zensus 2011
@@ -395,6 +394,8 @@ for (mz_id in mz){
         state_tmp$KFL = NULL
         rm(ew)
         saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_familien.rds"))
+        state_tmp$geom =NULL
+        utils::write.csv2(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_familien.csv"))
       }
 
     }
@@ -456,13 +457,13 @@ for (mz_id in mz){
       cat("HHTYP_FAM 5 \n")
       state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "HHF_1")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==2) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "HHF_2")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==3) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "HHF_3")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==4) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "HHF_4")
-      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==1) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
+      state_tmp = right_join(st_drop_geometry(ew %>% filter(Merkmal == "HHTYP_FAM" & Auspraegung_Code==5) %>%  group_by(GEN,ADE,GF,BSG,ARS,AGS,SDV_ARS,BEZ,IBZ,SN_L,SN_R,SN_K,SN_V1,SN_V2,SN_G,NUTS,WSK,DEBKG_ID) %>% summarise(Anzahl = sum(Anzahl))),state_tmp)
       names(state_tmp) <- gsub(x = names(state_tmp), pattern = "Anzahl",   replacement = "HHF_5")
 
 
@@ -507,7 +508,8 @@ for (mz_id in mz){
       state_tmp$EWZ = NULL
       state_tmp$KFL = NULL
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_haus.rds"))
-
+      state_tmp$geom =NULL
+      utils::write.csv2(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_haus.csv"))
 
     }
     else if (mz_id == "wohn"){
@@ -873,6 +875,8 @@ for (mz_id in mz){
       state_tmp$EWZ = NULL
       state_tmp$KFL = NULL
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_wohn.rds"))
+      state_tmp$geom = NULL
+      utils::write.csv2(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_wohn.csv"))
     }
   }
 }

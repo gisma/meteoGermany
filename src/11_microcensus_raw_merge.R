@@ -49,6 +49,7 @@ grid_fami_DE_sf = sf::st_as_sf( grid_fami_DE,
 saveRDS(grid_fami_DE_sf,paste0(envrmt$path_data_lev1,"/grid_fami_DE_sf.rds"))
 rm(grid_fami_DE_sf)
 rm(grid_fami_DE)
+
 # haushalte
 grid_haus_DE = grid_link %>%
   inner_join(haus_link,by = "Gitter_ID_100m") %>%  collect()
@@ -60,17 +61,6 @@ saveRDS(grid_haus_DE_sf,paste0(envrmt$path_data_lev1,"/grid_haus_DE_sf.rds"))
 rm(grid_haus_DE_sf)
 rm(grid_haus_DE)
 
-# gebäude
-grid_geb_DE = grid_link %>%
-  inner_join(geb_link,by = "Gitter_ID_100m") %>%  collect()
-grid_geb_DE_sf = sf::st_as_sf( grid_geb_DE,
-                                coords = c("x_mp_100m", "y_mp_100m"),
-                                crs = 3035,
-                                agr = "constant")
-saveRDS(grid_geb_DE_sf,paste0(envrmt$path_data_lev1,"/grid_geb_DE_sf.rds"))
-rm(grid_geb_DE_sf)
-rm(grid_geb_DE)
-
 # wohnungen
 grid_wohn_DE = grid_link %>%
   inner_join(wohn_link,by = "Gitter_ID_100m") %>%  collect()
@@ -81,3 +71,15 @@ grid_wohn_DE_sf = sf::st_as_sf( grid_wohn_DE,
 saveRDS(grid_wohn_DE_sf,paste0(envrmt$path_data_lev1,"/grid_wohn_DE_sf.rds"))
 rm(grid_wohn_DE_sf)
 rm(grid_haus_DE)
+
+# gebäude
+grid_geb_DE = grid_link %>%
+  inner_join(geb_link,by = "Gitter_ID_100m") %>%  collect()
+grid_geb_DE_sf = sf::st_as_sf( grid_geb_DE,
+                               coords = c("x_mp_100m", "y_mp_100m"),
+                               crs = 3035,
+                               agr = "constant")
+saveRDS(grid_geb_DE_sf,paste0(envrmt$path_data_lev1,"/grid_geb_DE_sf.rds"))
+rm(grid_geb_DE_sf)
+rm(grid_geb_DE)
+

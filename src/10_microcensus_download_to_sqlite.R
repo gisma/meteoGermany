@@ -63,12 +63,12 @@ fn  =  list.files(pattern = "100.[.]csv$", path = envrmt$path_data_lev0, full.na
 
 # ACHTUNG die sqlite Datei ist > 18 GB!
 mydb <- DBI::dbConnect(RSQLite::SQLite(), paste0(envrmt$path_data_lev0,"/mikrozensus2011_BD_2.sqlite"),cache_size = "2000000")
-dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(fn[1]))
-dbWriteTable(mydb, "mz_demografie_2011", data.table::fread(fn[2]))
-dbWriteTable(mydb, "mz_familie_2011", data.table::fread(fn[3]))
-dbWriteTable(mydb, "mz_haushalte_2011", data.table::fread(fn[4]))
-dbWriteTable(mydb, "mz_wohnungen_2011", data.table::fread(fn[5]))
-dbWriteTable(mydb, "mz_haus_2011", data.table::fread(fn[6]))
+dbWriteTable(mydb, "grid_bevoelkerung_2011", data.table::fread(fn[3]),overwrite= TRUE)
+dbWriteTable(mydb, "mz_demografie_2011", data.table::fread(fn[4]),overwrite= TRUE)
+dbWriteTable(mydb, "mz_familie_2011", data.table::fread(fn[5]),overwrite= TRUE)
+dbWriteTable(mydb, "mz_haushalte_2011", data.table::fread(fn[6]),overwrite= TRUE)
+dbWriteTable(mydb, "mz_wohnungen_2011", data.table::fread(fn[2]),overwrite= TRUE)
+dbWriteTable(mydb, "mz_haus_2011", data.table::fread(fn[1]),overwrite= TRUE)
 
 # listen aller enthaltenen tables
 dbListTables(mydb)

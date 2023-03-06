@@ -10,7 +10,7 @@ library(rprojroot)
 root_folder = find_rstudio_root_file()
 source(file.path(root_folder, "src/functions/000_setup.R"))
 
-mz = c("wohn")#,"fami","haus","wohn")
+mz = c("wohn")#,"fami","haus","demo")
 for (mz_id in mz){
   for (s_id in state_id){
     if (mz_id == "demo"){
@@ -877,7 +877,13 @@ for (mz_id in mz){
       saveRDS(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_wohn.rds"))
       state_tmp$geom = NULL
       utils::write.csv2(state_tmp,paste0(envrmt$path_data_lev1,"/",s_id,"_state_mz_wohn.csv"))
+
     }
   }
 }
-#bind_rows(state_tmp,state_tmp)
+mz_id = c("wohn")#,"familien","haus","bevoelkerung")
+for (mz in mz_id){
+  for (s_id in state_id){
+    system(paste0("head -n 1 ",envrmt$path_data_lev1,"/01_state_mz_",mz,".csv > ",envrmt$path_data_lev1,"/",mz,"_gemeinden_DE.out && tail -n+2 -q ",envrmt$path_data_lev1,"/*",mz,".csv >> ",envrmt$path_data_lev1,"/",mz,"_gemeinden_DE.out"))  }
+  }
+    #bind_rows(state_tmp,state_tmp)

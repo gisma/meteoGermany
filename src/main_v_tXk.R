@@ -1,12 +1,12 @@
 #' Main control script
 #'
-#' @description Use this script for controlling the processing.
-#'
-#' @author [name], [email@com]
-
+#' @description controls the main prediction run. download and prepare climate and DEM data and perform a Kriging with autovariogram
+#' https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482706002362
+#' @author Chris Reudenbach creuden@gmail.com
 #devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
+appendpackagesToLoad= c("downloader","dplyr","readr","doParallel")
 appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
 root_folder = find_rstudio_root_file()
 
@@ -15,119 +15,88 @@ source(file.path(root_folder, "src/functions/000_setup.R"))
 crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")
 epsg=3035
 res=500
-startDate = "2000-01-01"
-endDate = "2022-03-01"
-type= "recent" #"historical"
+sample_size =50
+startDate = "2003-01-01"
+endDate = "2021-12-31"
+type= "historical"#"historical"#"recent" #
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
-cVar = "PM"
+dem = st_as_stars(srtm500)
+cVar.sf = sf::st_as_sf(cVar.sp)
+rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500,cVar.sp)
+gc()
 
-##------------------ day data set
-dat_list = sort(as.character(unique(cVar.sp$MESS_DATUM)))
+for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
+  # cVar = "UPM"
 
-z=1
-for (currentDate in dat_list) {
-  cd= substr(currentDate,1,10)
-  if(!file.exists(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))){
-    cVar.sp.day = cVar.sp[as.character(unique(cVar.sp$MESS_DATUM)) == as.Date(currentDate),]
-    cVar.sp.day <- spatialEco::sp.na.omit(cVar.sp.day,cVar)
-    
-    cVar.sp.day
-    cat(cVar," ",cd, " date ",z, " von ",length(dat_list),"\n")
-    # tune idw model
-    # set parameter
-    # # neighbors = length(cVar.sp.day)-1
-    # #
-    # # my_IDW <- cv.IDW(spatialDF = cVar.sp.day,
-    # #                  stat.formula = formula(as.formula(paste(cVar, "~ 1"))),
-    # #                  seqBeta = seq(from = 1.5, to = 2.7, 0.3),
-    # #                  seqNeighbors = seq(from = 10, to = neighbors / 4, 3),
-    # #                  evalGridSize = 500,
-    # #                  evalRaster = grid.DE,
-    # #                  verbose = TRUE)
-    # #
-    # # gridCV <- my_IDW$gridCV
-    # # head(gridCV[with(gridCV, order(RMSE)),],10)
-    # #
-    # # ggplot(gridCV, aes(Neighbors, Beta)) +
-    # #   geom_tile(aes(fill = RMSE), colour = "black") +
-    # #   scale_fill_gradient(low = "steelblue", high = "orange") +
-    # #   theme_bw() +
-    # #   ggtitle('Parameter search space')
-    # #
-    # daily_temp = mask(raster(my_IDW[['idwBestRaster']]),DE.states.sp) # aus dem optimierungslauf
+  ##------------------ day data set
+  dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
+  end=length(dat_list)
+  matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
+    currentDate = dat_list[n]
+    if (as.Date(currentDate) >= as.Date(startDate) & as.Date(currentDate) <= as.Date(endDate)){
+      cd= substr(currentDate,1,10)
+      if(!file.exists(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))){
+        cVar.sf.day = cVar.sf[as.character(unique(cVar.sf$MESS_DATUM)) == as.Date(currentDate),]
+        if (cVar == "SDK") {
+          dt=suncalc::getSunlightTimes(date = as.Date(currentDate), lat = 51.0, lon = 9.0, tz = "UTC")
+          td=dt$sunset-dt$sunrise
+          maxDaylight= ceiling(as.numeric(unlist(stringr::str_split(td,"Time difference of "))))
+          cVar.sf.day$tmp=NA
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > maxDaylight, maxDaylight))
+        } else if (cVar == "PM") {
+          cVar.sf.day$tmp=NA
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 1060.6, 1060.6))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 954.9, 954.9))
+        } else if (cVar == "UPM") {
+          cVar.sf.day$tmp=NA
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 100, 100))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 0, 0))
+        }else if (cVar == "TXK" | cVar == "TNK" | cVar == "TMK") {
+          cVar.sf.day$tmp=NA
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 42, 42))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < -46.0, -46.0))
+        }
 
-    # mapview(daily_temp) +
-    #    mapview(DE.states.sp,alpha.regions=0)+
-    #    mapview(cVar.sp.day[,1], cex = 0.5, color = "red")
+        dat = dat[,c("Stationshoehe","tmp","geometry")]
+        dat$tmp=as.numeric(dat$tmp)
+        names(dat) = c("Stationshoehe",cVar,"geometry")
+        # cVar.sf.day %>% mutate(tmp = factor(ifelse(!!sym(cVar) == "SDK" & (!!sym(cVar) > 18 | !!sym(cVar) < 0), 1.233, 99, 88)))
+        data <- dat %>% drop_na()
+        data <- dplyr::distinct(data, geometry, .keep_all = TRUE)
+        data = st_transform(data,st_crs(dem))
+        st_crs(dem)=3035
+        st_crs(data)=3035
+        seed=123
+        vm.auto = automap::autofitVariogram(formula = as.formula(paste(cVar, "~1")),
+                                            input_data = data)
+        #plot(vm.auto)
+        seed=123
+        tmax.pred <- krige(formula = as.formula(paste(cVar, "~Stationshoehe")),
+                           locations = data,#data[sample.int(nrow(data),min(sample_size,nrow(data))),],
+                           newdata = dem,
+                           model = vm.auto$var_model,
+                           debug.level=-1)
 
-    #---------------------------------------------------------------------------------------------------------------------
+        stars::write_stars(tmax.pred,paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
+        rm(tmax.pred)
+        gc()
+      }
 
-    # ev <- variogram(cVar~1, cVar.sp.day, cloud = TRUE)
-    # plot(ev)
-
-    # ev <- variogram(cVar~1, cVar.sp.day)
-    # plot(ev)
-
-
-    # vm <- vgm(psill = 13.14087, model = "Exp", range = 248719.8, nugget= 0)
-    # plot(ev,vm)
-    #
-    # vm.exp <- fit.variogram(ev, vgm("Exp"))
-    # vm.gau <- fit.variogram(ev, vgm("Gau"))
-    # vm.sph <- fit.variogram(ev, vgm("Sph"))
-    # vm.pen <- fit.variogram(ev, vgm("Pen"))
-    # plot(ev, vm.exp, main = 'Exponential variogram model')
-    # plot(ev, vm.gau, main = 'Gauss variogram model')
-    # plot(ev, vm.sph, main = 'Spherical variogram model')
-    # plot(ev, vm.pen, main = 'Spherical variogram model')
-
-
-    vm.auto = autofitVariogram(formula = as.formula(paste(cVar, "~ 1")),
-                               input_data = cVar.sp.day)
-    # plot(vm.auto)
-
-    # anisotropy
-    # alpha <- (0:3)*45
-    # alpha
-    # ev.anis <- variogram(cVar~1, cVar.sp.day, alpha = alpha)
-    # plot(ev.anis)
-    # plot(ev.anis, vm.gau)
-    #
-    # vm.anis <-  vgm(psill = 7.6086173,
-     #                 model = "Exp",
-    #                 range = 131529.2,
-    #                 nugget = 0.9792447,
-    #                 anis = c(0, 1))
-    # plot(ev.anis,vm.anis)
-
-    # rain.OK.LOOCV.auto <- krige.cv(formula = as.formula(paste(cVar, "~Stationshoehe")),
-    #                               locations = cVar.sp.day,
-    #                               model = vm.auto$var_model)
-    #
-    # RMSE(residuals = rain.OK.LOOCV.auto@data$residual)
-
-    # bubble(rain.OK.LOOCV.auto,
-    #        "residual",
-    #        main = "Ordinary Kriging rainfall: LOOCV residuals")
-
-    cVar.sp.day = spTransform(cVar.sp.day,
-                              crs(srtm.germany.spdf))
-
-    tmax.pred <- krige(formula = as.formula(paste(cVar, "~Stationshoehe")),
-                       locations = cVar.sp.day,
-                       newdata = srtm.germany.spdf,
-                       model = vm.auto$var_model,
-                       debug.level=0)
-
-    writeRaster(raster(tmax.pred, layer=1, values=TRUE),paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
     }
-    z=z+1
+  }, mc.cores = 5, mc.allow.recursive = TRUE)
+
+  # start extraction per community
+  source(file.path(root_folder, "src/skript_calculate_communities_DE_climate.R"))
 }
 
 
 # pal.nr = ceiling(max(range(tmax.pred@data$var1.pred)) - min(range(tmax.pred@data$var1.pred)))
 # spplot(tmax.pred['var1.pred'],
-#        main = 'Predicted daily Max Temperature [C] ',
+#        main = 'predicted daily variable ',
 #        #at = seq(min.val, max.val, 1),
 #        col.regions = rev(viridis(pal.nr)))

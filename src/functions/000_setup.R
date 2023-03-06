@@ -12,7 +12,7 @@
 require(envimaR)
 
 # basic packages
-packagesToLoad = c("mapview",  "tmap", "raster", "stars", "sf","dplyr","tidyverse","lubridate","rdwd","dismo","gstat","tmaptools","viridis","automap")
+packagesToLoad = c("mapview",  "raster", "stars", "sf","dplyr","tidyverse","lubridate","rdwd","dismo","gstat","viridis","automap")
 
 
 # mandantory folder structure

@@ -17,7 +17,7 @@ epsg=3035
 res=500
 sample_size =50
 startDate = "2003-01-01"
-endDate = "2021-12-31"
+endDate = "2004-12-31"
 type= "historical"#"historical"#"recent" #
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
@@ -27,7 +27,7 @@ rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500,
 gc()
 
 for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
-  # cVar = "UPM"
+   cVar = "TNK"
 
   ##------------------ day data set
   dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
@@ -37,7 +37,7 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
     if (as.Date(currentDate) >= as.Date(startDate) & as.Date(currentDate) <= as.Date(endDate)){
       cd= substr(currentDate,1,10)
       if(!file.exists(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))){
-        cVar.sf.day = cVar.sf[as.character(unique(cVar.sf$MESS_DATUM)) == as.Date(currentDate),]
+        cVar.sf.day = cVar.sf[as.character(cVar.sf$MESS_DATUM) == as.Date(currentDate),]
         if (cVar == "SDK") {
           dt=suncalc::getSunlightTimes(date = as.Date(currentDate), lat = 51.0, lon = 9.0, tz = "UTC")
           td=dt$sunset-dt$sunrise
@@ -48,7 +48,7 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
         } else if (cVar == "PM") {
           cVar.sf.day$tmp=NA
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
-          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 1060.6, 1060.6))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!symdata(cVar), as.numeric(!!sym(cVar)) > 1060.6, 1060.6))
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 954.9, 954.9))
         } else if (cVar == "UPM") {
           cVar.sf.day$tmp=NA
@@ -87,8 +87,8 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
         gc()
       }
 
-    }
-  }, mc.cores = 5, mc.allow.recursive = TRUE)
+      }
+    }, mc.cores = 10, mc.allow.recursive = TRUE)
 
   # start extraction per community
   source(file.path(root_folder, "src/skript_calculate_communities_DE_climate.R"))

@@ -16,7 +16,7 @@
 #gemeindeliste_comb = readRDS(paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 gemeinden_sf_3035 = st_read(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpkg"))
 
-
+#cVar ="TXK"
   # Create list of corresponding files
   clim_files <- sort(list.files(paste0(envrmt$path_data_lev1,"/",cVar), paste0("*",cVar,"\\.tif$"), full.names = T),decreasing = F)
   if (!dir.exists(paste0(envrmt$path_data_lev2,cVar)))
@@ -61,7 +61,7 @@ gemeinden_sf_3035 = st_read(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpk
         mutate_if(is.numeric, round, digits=dig)
       var_fin=sjmisc::replace_columns(var,vr)
       #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
-      write_csv2(st_drop_geometry(var_fin),file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")))
+      data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
       }
   }, mc.cores = 30, mc.allow.recursive = TRUE)
 
@@ -80,5 +80,6 @@ gemeinden_sf_3035 = st_read(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpk
 #var_code = c("TNK","TMK","SDK")
 #for (cVar in var_code){
   system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"),intern =F)
-
+  system(paste0("7z a -tzip -v2G . ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"))
+#")
 #}

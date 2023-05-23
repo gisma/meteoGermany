@@ -1,37 +1,38 @@
 #' Main control script
 #'
-#' @description controls the main prediction run. download and prepare climate and DEM data and perform a Kriging with autovariogram
+#' @description controls the main prediction run. Download and prepare climate and DEM data and perform a Kriging with autovariogram.
+#'              A two step correction is performed to kleep the Interpolation in valid ranges. Finally the corrected data is extracted by communities
 #' https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482706002362
 #' @author Chris Reudenbach creuden@gmail.com
+
+# ---- setup project ----
 #devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
-appendpackagesToLoad= c("downloader","dplyr","readr","doParallel")
-appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
+appendProjectDirList = c("data/data_lev0/GhcnDaily",
+                         "data/data_lev0/GhcnMonthly")
 root_folder = find_rstudio_root_file()
-
 source(file.path(root_folder, "src/functions/000_setup.R"))
 
+# ---- default arguments ----
 crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")
 epsg=3035
-res=500
-sample_size =50
+res=500     # resolution of prediction DEM
 startDate = "2003-01-01"
 endDate = "2021-12-31"
-type= "historical"#"historical"#"recent" #
-# get data
+type= "historical"    #c("historical","recent") # recent means rolling the last 500 days
+getDEM = FALSE        # download and prepare DEM data (only needed once)
+getClimate = FALSE    # download climate data (usually only done once)
+minStations = 5       # minimum number of accepted stations
+
+# ---- start processing ----
+# ---- prepare the climate and auxiliary data----
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
-dem = st_as_stars(srtm500)
-cVar.sf = sf::st_as_sf(cVar.sp)
-rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500,cVar.sp)
-gc()
 
-for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
-  cVar = "SDK"
+dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
 
-  ##------------------ day data set
-  dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
-  end=length(dat_list)
+for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
+
   matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
     currentDate = dat_list[n]
     if (as.Date(currentDate) >= as.Date(startDate) & as.Date(currentDate) <= as.Date(endDate)){
@@ -65,9 +66,8 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
         dat = dat[,c("Stationshoehe","tmp","geometry")]
         dat$tmp=as.numeric(dat$tmp)
         names(dat) = c("Stationshoehe",cVar,"geometry")
-        # cVar.sf.day %>% mutate(tmp = factor(ifelse(!!sym(cVar) == "SDK" & (!!sym(cVar) > 18 | !!sym(cVar) < 0), 1.233, 99, 88)))
         data <- dat %>% drop_na()
-        if (nrow(data)>5){
+        if (nrow(data)>minStations){
           data <- dplyr::distinct(data, geometry, .keep_all = TRUE)
           data = st_transform(data,st_crs(dem))
           st_crs(dem)=3035
@@ -95,7 +95,9 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
 
     }
   }, mc.cores = 10, mc.allow.recursive = TRUE)
+}
 
-  # final correction and extraction per community
+# final correction and extraction per community
+for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
   source(file.path(root_folder, "src/skript_calculate_communities_DE_climate.R"))
 }

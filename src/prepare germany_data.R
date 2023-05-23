@@ -15,21 +15,21 @@ states_special = c("Baden-Württemberg","Nordrhein-Westfalen","Hessen","Bayern",
                    "Hamburg","Bremen")
 DE.states <- germany.sf[germany.sf$NAME_1 %in% states_special,]
 DE <- DE.states %>% group_by(NAME_0) %>% summarize()
- de_4326 =st_transform(DE,4326)
+de_4326 =st_transform(DE,4326)
 #  st_write(de_4326,paste0(envrmt$path_data_lev0,"/de_4326.shp"))
 
 DE.sp <- as(DE, 'Spatial')
 
 cat("getting srtm data\n")
- # download.url <- "https://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_30x30/TIFF/N30E000.zip"
- # zipfile <- paste0(envrmt$path_data_lev0,"/N30E000.zip")
- # download.file(download.url,zipfile, mode = "wb")
- # unzip(zipfile,exdir = envrmt$path_data_lev0)
- #system('gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/de_4326.shp -cl de_4326 -crop_to_cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/srtm_germany_dtm.tif /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/germany.tif')
- # system(paste0("gdalwarp -overwrite -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -tr ",res," ", res, " -tap -cutline ",envrmt$path_data_lev0,"/de_4326.shp -cl de_4326 -crop_to_cutline -multi ",envrmt$path_data_lev0,"/cut_n30e000.tif ", envrmt$path_data_lev0,"/germany.tif"))
- srtm.germany = raster( paste0(envrmt$path_data_lev0,"/germany.tif"))
- # cast to SpatialPixelsDataFrame
- srtm.germany.spdf <- as(srtm.germany,
+# download.url <- "https://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_30x30/TIFF/N30E000.zip"
+# zipfile <- paste0(envrmt$path_data_lev0,"/N30E000.zip")
+# download.file(download.url,zipfile, mode = "wb")
+# unzip(zipfile,exdir = envrmt$path_data_lev0)
+#system('gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/de_4326.shp -cl de_4326 -crop_to_cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/srtm_germany_dtm.tif /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/germany.tif')
+# system(paste0("gdalwarp -overwrite -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -tr ",res," ", res, " -tap -cutline ",envrmt$path_data_lev0,"/de_4326.shp -cl de_4326 -crop_to_cutline -multi ",envrmt$path_data_lev0,"/cut_n30e000.tif ", envrmt$path_data_lev0,"/germany.tif"))
+srtm.germany = raster( paste0(envrmt$path_data_lev0,"/germany.tif"))
+# cast to SpatialPixelsDataFrame
+srtm.germany.spdf <- as(srtm.germany,
                         'SpatialPixelsDataFrame')
 colnames(srtm.germany.spdf@data) <- 'Stationshoehe'
 
@@ -54,13 +54,13 @@ if (!file.exists(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))){
   #
 
   # create subset from msf according to the data
-  stations = msf[year(msf$von_datum) >= startDate & year(msf$von_datum) <= endDate ,]
+  stations = msf[year(msf$von_datum) >=  year(startDate) & year(msf$von_datum) <=  year(endDate) ,]
   names(stations)[1] = "STATIONS_ID"
   merge = merge(stations,gm_tempMax)
   #st_write(merge,paste0(envrmt$path_data_lev0,"/daily_climate.gpkg"))
   saveRDS(merge,paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
 }
-  cVar.sf = readRDS(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
+cVar.sf = readRDS(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
 
 # transform to UTM zone 33
 cVar.sf <- st_transform(cVar.sf, crs)

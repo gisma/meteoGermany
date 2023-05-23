@@ -17,7 +17,7 @@ epsg=3035
 res=500
 sample_size =50
 startDate = "2003-01-01"
-endDate = "2004-12-31"
+endDate = "2021-12-31"
 type= "historical"#"historical"#"recent" #
 # get data
 source(file.path(envrmt$path_src,"prepare germany_data.R"))
@@ -27,7 +27,7 @@ rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500,
 gc()
 
 for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
-   cVar = "TNK"
+  cVar = "SDK"
 
   ##------------------ day data set
   dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
@@ -48,7 +48,7 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
         } else if (cVar == "PM") {
           cVar.sf.day$tmp=NA
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
-          dat = cVar.sf.day %>% mutate(tmp = replace(!!symdata(cVar), as.numeric(!!sym(cVar)) > 1060.6, 1060.6))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 1060.6, 1060.6))
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 954.9, 954.9))
         } else if (cVar == "UPM") {
           cVar.sf.day$tmp=NA
@@ -67,36 +67,35 @@ for (cVar in c("TXK","TNK","TMK")){ #,"SDK","PM","UPM")){
         names(dat) = c("Stationshoehe",cVar,"geometry")
         # cVar.sf.day %>% mutate(tmp = factor(ifelse(!!sym(cVar) == "SDK" & (!!sym(cVar) > 18 | !!sym(cVar) < 0), 1.233, 99, 88)))
         data <- dat %>% drop_na()
-        data <- dplyr::distinct(data, geometry, .keep_all = TRUE)
-        data = st_transform(data,st_crs(dem))
-        st_crs(dem)=3035
-        st_crs(data)=3035
-        seed=123
-        vm.auto = automap::autofitVariogram(formula = as.formula(paste(cVar, "~1")),
-                                            input_data = data)
-        #plot(vm.auto)
-        seed=123
-        tmax.pred <- krige(formula = as.formula(paste(cVar, "~Stationshoehe")),
-                           locations = data,#data[sample.int(nrow(data),min(sample_size,nrow(data))),],
-                           newdata = dem,
-                           model = vm.auto$var_model,
-                           debug.level=-1)
+        if (nrow(data)>5){
+          data <- dplyr::distinct(data, geometry, .keep_all = TRUE)
+          data = st_transform(data,st_crs(dem))
+          st_crs(dem)=3035
+          st_crs(data)=3035
+          seed=123
 
-        stars::write_stars(tmax.pred,paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
-        rm(tmax.pred)
-        gc()
+          vm.auto = automap::autofitVariogram(formula = as.formula(paste(cVar, "~1")),
+                                              input_data = data)
+
+          #plot(vm.auto)
+          seed=123
+          tmax.pred <- krige(formula = as.formula(paste(cVar, "~Stationshoehe")),
+                             locations = data,#data[sample.int(nrow(data),min(sample_size,nrow(data))),],
+                             newdata = dem,
+                             model = vm.auto$var_model,
+                             debug.level=-1)
+
+          stars::write_stars(tmax.pred,paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
+          rm(tmax.pred)
+          gc()
+        } else {
+          stars::write_stars(dem*0-9999,paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"),overwrite=TRUE,options="COMPRESS=LZW")
+        }
       }
 
-      }
-    }, mc.cores = 10, mc.allow.recursive = TRUE)
+    }
+  }, mc.cores = 10, mc.allow.recursive = TRUE)
 
-  # start extraction per community
+  # final correction and extraction per community
   source(file.path(root_folder, "src/skript_calculate_communities_DE_climate.R"))
 }
-
-
-# pal.nr = ceiling(max(range(tmax.pred@data$var1.pred)) - min(range(tmax.pred@data$var1.pred)))
-# spplot(tmax.pred['var1.pred'],
-#        main = 'predicted daily variable ',
-#        #at = seq(min.val, max.val, 1),
-#        col.regions = rev(viridis(pal.nr)))

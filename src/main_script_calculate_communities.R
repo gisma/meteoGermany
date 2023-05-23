@@ -1,22 +1,12 @@
-#' supporting script
-#'
 #' @description extraction and correction for irregular values of descriptive statistics of each community
-#'
 #' @author Chris Reudenbach creuden@gmail.com
 
-#devtools::install_github("envima/envimaR")
-# library(envimaR)
-# library(rprojroot)
-# appendpackagesToLoad= c("downloader","dplyr","readr")
-# appendProjectDirList = c("data/data_lev0/GhcnDaily","data/data_lev0/GhcnMonthly")
-# root_folder = find_rstudio_root_file()
-# source(file.path(root_folder, "src/functions/000_setup.R"))
 
 #gemeinden_sf_3035 = readRDS(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.rds"))
 #gemeindeliste_comb = readRDS(paste0(envrmt$path_data_lev0,"LAU_Names.rds"))
 gemeinden_sf_3035 = st_read(paste0(envrmt$path_data_lev0,"/gemeinden_DE_3035.gpkg"))
 
-#cVar ="TXK"
+
 # Create list of corresponding files
 clim_files <- sort(list.files(paste0(envrmt$path_data_lev1,"/",cVar), paste0("*",cVar,"\\.tif$"), full.names = T),decreasing = F)
 if (!dir.exists(paste0(envrmt$path_data_lev2,cVar)))
@@ -66,20 +56,5 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
 }, mc.cores = 12, mc.allow.recursive = TRUE)
 
 
-
-
-# depreceated to slow to  memory consuming
-# for (cVar in var_code){
-#
-# df <- sort(list.files(paste0(envrmt$path_data_lev2,"/",cVar), paste0("*",cVar,"\\.csv$"), full.names = T),decreasing = F) %>%
-#   lapply(read_csv2) %>%
-#   bind_rows
-# write_csv2(df,file.path(envrmt$path_data_lev2,paste0(cVar,"_2000-2022.csv")))
-# }
-
-#var_code = c("TNK","TMK","SDK")
-#for (cVar in var_code){
 system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"),intern =F)
 system(paste0("7z a -tzip -v2G . ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"))
-#")
-#}

@@ -28,7 +28,7 @@ if (getDEM){
   unzip(zipfile,exdir = envrmt$path_data_lev0)
   system('gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/de_4326.shp -cl de_4326 -crop_to_cutline /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/srtm_germany_dtm.tif /media/creu/742BDA5A2D11BD36/meteoGermany/data/data_lev0/germany.tif')
   system(paste0("gdalwarp -overwrite -s_srs EPSG:4326 -t_srs EPSG:3035 -of GTiff -tr ",res," ", res, " -tap -cutline ",envrmt$path_data_lev0,"/de_4326.shp -cl de_4326 -crop_to_cutline -multi ",envrmt$path_data_lev0,"/cut_n30e000.tif ", envrmt$path_data_lev0,"/germany.tif"))
-}
+
 
 srtm.germany = raster( paste0(envrmt$path_data_lev0,"/germany.tif"))
 # cast to SpatialPixelsDataFrame
@@ -54,7 +54,13 @@ template_raster <-grid.DE %>%
 srtm500=resample(srtm.germany,template_raster)
 srtm500=as.integer(round(srtm500,0))
 names(srtm500) <- 'Stationshoehe'
+
 dem = st_as_stars(srtm500)
+saveRDS(dem,paste0(envrmt$path_data_lev0,"dem.rds"))
+rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500)
+}
+
+dem = readRDS(paste0(envrmt$path_data_lev0,"dem.rds"))
 
 ######
 message("::: get climate data :::")
@@ -78,15 +84,15 @@ if (getClimate) {
   names(stations)[1] = "STATIONS_ID"
   merge = merge(stations,gm_tempMax)
   #st_write(merge,paste0(envrmt$path_data_lev0,"/daily_climate.gpkg"))
+  
+  
+  # transform to UTM zone 33
+  cVar.sf <- st_transform(merge, crs)
+  cVar.sp <- as(cVar.sf, 'Spatial')
+  cVar.sf = sf::st_as_sf(cVar.sp)
   saveRDS(merge,paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
+  rm(cVar.sp)
 }
-
 cVar.sf = readRDS(paste0(envrmt$path_data_lev0,"/daily_climate_",type,".rds"))
 
-# transform to UTM zone 33
-cVar.sf <- st_transform(cVar.sf, crs)
-cVar.sp <- as(cVar.sf, 'Spatial')
-cVar.sf = sf::st_as_sf(cVar.sp)
-
-rm(srtm.germany,template_raster,grid.DE,srtm.germany.spdf,germany,DE.sp,srtm500,cVar.sp)
 gc()

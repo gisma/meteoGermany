@@ -57,4 +57,4 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
 
 
 system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"),intern =F)
-system(paste0("7z a -tzip -v2G . ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"))
+#system(paste0("7z a -tzip -v2G . ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"))

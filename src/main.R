@@ -1,8 +1,13 @@
 #' Main control script
 #'
-#' @description controls the main prediction run. Download and prepare climate and DEM data and perform a Kriging with autovariogram.
-#'              A two step correction is performed to kleep the Interpolation in valid ranges. Finally the corrected data is extracted by communities
-#' https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482706002362
+#' @description controls the main prediction run. 
+#'              Download and prepare climate and DEM data 
+#'              perform a Kriging with autovariogram.
+#'              A two step value correction is performed 
+#'              to keep the Interpolation in valid ranges. 
+#'              Finally the corrected data is extracted by communities
+#'              
+#' Sunshine kriging https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482706002362
 #' @author Chris Reudenbach creuden@gmail.com
 
 # ---- setup project ----
@@ -27,10 +32,10 @@ minStations = 5       # minimum number of accepted stations
 
 # ---- start processing ----
 # ---- prepare the climate and auxiliary data----
-source(file.path(envrmt$path_src,"prepare germany_data.R"))
+source(file.path(envrmt$path_src,"main_prepare_data.R"))
 
 dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
-
+cVar ="SDK"
 for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
 
   matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
@@ -99,5 +104,5 @@ for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
 
 # final correction and extraction per community
 for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
-  source(file.path(root_folder, "src/skript_calculate_communities_DE_climate.R"))
+  source(file.path(root_folder, "src/main_script_calculate_communities.R"))
 }

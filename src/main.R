@@ -27,16 +27,16 @@ startDate = "2003-01-01"
 endDate = "2021-12-31"
 type= "historical"    #c("historical","recent") # recent means rolling the last 500 days
 getDEM = FALSE        # download and prepare DEM data (only needed once)
-getClimate = FALSE    # download climate data (usually only done once)
+getClimate = FALSE   # download climate data (usually only done once)
 minStations = 5       # minimum number of accepted stations
-
+calc_commu = FALSE
 # ---- start processing ----
 # ---- prepare the climate and auxiliary data----
 source(file.path(envrmt$path_src,"main_prepare_data.R"))
 
 dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
-cVar ="SDK"
-for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
+cVar ="RSK"
+for (cVar in c("RSK", "TNK","FM","NM")){ #, "TXK","TNK","TMK","SDK","PM","UPM")){
 
   matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
     currentDate = dat_list[n]
@@ -66,7 +66,17 @@ for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 42, 42))
           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < -46.0, -46.0))
-        }
+         } else if (cVar == "FM") {
+          cVar.sf.day$tmp=NA
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 120, 120))
+          dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 0, 0))
+         } else if (cVar == "RSK") {
+           cVar.sf.day$tmp=NA
+           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) == -999, NA))
+           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) > 312, 312))
+           dat = cVar.sf.day %>% mutate(tmp = replace(!!sym(cVar), as.numeric(!!sym(cVar)) < 0, 0))
+         }
 
         dat = dat[,c("Stationshoehe","tmp","geometry")]
         dat$tmp=as.numeric(dat$tmp)
@@ -103,6 +113,6 @@ for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
 }
 
 # final correction and extraction per community
-for (cVar in c("TXK","TNK","TMK","SDK","PM","UPM")){
+for (cVar in c("RSK", "FM","NM", "TXK","TNK","TMK","SDK","PM","UPM")){
   source(file.path(root_folder, "src/main_script_calculate_communities.R"))
 }

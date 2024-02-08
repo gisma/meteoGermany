@@ -5,8 +5,8 @@
 
 # Retrieve Federal States by the the getData() function from the raster package
 message("::: get masking boundary data :::")
-# germany <- getData(country = "Germany", level = 1)
-germany <- geodata::gadm(country="DEU", level=1, path=tempdir())
+germany <- getData(country = "Germany", level = 1)
+#germany <- geodata::gadm(country="DEU", level=1, path=tempdir())
 germany.sf <- st_as_sf(germany)
 # transform to UTM zone 33
 germany.sf <- st_transform(germany.sf, crs = crs)
@@ -16,7 +16,7 @@ states_special = c("Baden-Württemberg","Nordrhein-Westfalen","Hessen","Bayern",
                    "Schleswig-Holstein","Brandenburg","Thüringen","Saarland","Berlin",
                    "Hamburg","Bremen")
 DE.states <- germany.sf[germany.sf$NAME_1 %in% states_special,]
-DE <- DE.states %>% group_by(COUNTRY) %>% summarize()
+DE <- DE.states %>% group_by(NAME_1) %>% summarize()
 DE.sp <- as(DE, 'Spatial')
 
 message("::: get srtm elevation data :::")

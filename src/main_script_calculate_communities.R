@@ -41,8 +41,24 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
       names(current) = xfun::sans_ext(basename(clim_files[i]))
       writeRaster(current, clim_files[i],gdal=c("COMPRESS=NONE", "TFW=YES"),overwrite=TRUE)
       dig = 1
+    }else if (cVar == "FM") {
+      current = terra::rast(clim_files[i])
+      m <- c(0, -1000,0, 120,99999,120)
+      rclmat <- matrix(m, ncol=3, byrow=TRUE)
+      current <- terra::classify(current, rclmat, include.lowest=TRUE)
+      names(current) = xfun::sans_ext(basename(clim_files[i]))
+      writeRaster(current, clim_files[i],gdal=c("COMPRESS=NONE", "TFW=YES"),overwrite=TRUE)
+      dig = 1
+    }else if (cVar == "RSK") {
+      current = terra::rast(clim_files[i])
+      m <- c(0, -1000,0, 312,99999,312)
+      rclmat <- matrix(m, ncol=3, byrow=TRUE)
+      current <- terra::classify(current, rclmat, include.lowest=TRUE)
+      names(current) = xfun::sans_ext(basename(clim_files[i]))
+      writeRaster(current, clim_files[i],gdal=c("COMPRESS=NONE", "TFW=YES"),overwrite=TRUE)
+      dig = 1
     }
-
+    if (calc_commu){
     # Calculate data frame of min and max precipitation for all months
     var <- cbind(gemeinden_sf_3035, exactextractr::exact_extract(raster::raster(clim_files[i]), gemeinden_sf_3035, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
     var$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
@@ -52,7 +68,7 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
     var_fin=sjmisc::replace_columns(var,vr)
     #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
     data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
-  }
+  }}
 }, mc.cores = 12, mc.allow.recursive = TRUE)
 
 

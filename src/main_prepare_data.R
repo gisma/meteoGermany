@@ -13,6 +13,7 @@ germany.sf <- st_as_sf(germany)
 bl_sf = st_as_sf(bl_sp)
 # transform to UTM zone 33
 germany.sf <- st_transform(germany.sf, crs = crs)
+bl_sf <- st_transform(bl_sf, crs = crs)
 # dissolve data
 states_special = c("Baden-Württemberg","Nordrhein-Westfalen","Hessen","Bayern","Niedersachsen",
                    "Sachsen-Anhalt","Rheinland-Pfalz","Sachsen","Mecklenburg-Vorpommern",

@@ -64,14 +64,14 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
   if (calc_bl) 
   {  
     # Calculate data frame of min and max precipitation for all months
-    var <- cbind(bl_sf, exactextractr::exact_extract(terra::rast(clim_files[i]), bl_sf, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
+    var <- cbind(bl_sf, exactextractr::exact_extract(current, bl_sf, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
     var$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
     vr=st_drop_geometry(var[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
       mutate_if(is.numeric, round, digits=dig)
     var_fin=sjmisc::replace_columns(var,vr)
     #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
     data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,bl,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
-    current = terra::mask(raster::raster(clim_files[i]), bl_sf)
+    current = terra::mask(current, bl_sf)
     current = terra::crop(current,bl_sf)
     raster::writeRaster(current,file.path(envrmt$path_data_lev1,bl,cVar,paste0(bl,basename(clim_files[i]))),overwrite=TRUE)
   }  else {
@@ -92,7 +92,9 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
     #}
 }, mc.cores = 12, mc.allow.recursive = TRUE)
 
-
+if (calc_bl)
+  system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",bl,cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",bl,cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",bl,cVar,"/",bl,cVar,"_2003-2021.out"),intern =F)
+#
 if (calc_commu)
   system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"),intern =F)
 #system(paste0("7z a -tzip -v2G . ",envrmt$path_data_lev2,"/",cVar,"/",cVar,"_2003-2021.out"))

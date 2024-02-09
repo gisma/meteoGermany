@@ -37,7 +37,7 @@ calc_bl = TRUE
 source(file.path(envrmt$path_src,"main_prepare_data.R"))
 
 dat_list = sort(as.character(unique(cVar.sf$MESS_DATUM)))[1:length(unique(cVar.sf$MESS_DATUM))]
-cVar ="NM"
+cVar ="RSK"
 for (cVar in c("RSK", "SDK",  "NM",  "VPM", "PM ", "TMK", "UPM",  "TXK",  "TNK",  "TGK") ){
 
   matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
@@ -115,6 +115,6 @@ for (cVar in c("RSK", "SDK",  "NM",  "VPM", "PM ", "TMK", "UPM",  "TXK",  "TNK",
 }
 
 # final correction and extraction per community
-for (cVar in c("RSK", "TXK","TNK","TMK","SDK","PM","UPM")){
+for (cVar in c("RSK", "TXK","TNK","TMK","PM","UPM")){
   source(file.path(root_folder, "src/main_script_calculate_communities.R"))
 }

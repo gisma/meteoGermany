@@ -6,8 +6,11 @@
 # Retrieve Federal States by the the getData() function from the raster package
 message("::: get masking boundary data :::")
 germany <- getData(country = "Germany", level = 1)
+bl_sp <- getData(country = "Germany", level = 1)[getData(country = "Germany", level = 1)$NAME_1 == bl, ]
+
 #germany <- geodata::gadm(country="DEU", level=1, path=tempdir())
 germany.sf <- st_as_sf(germany)
+bl_sf = st_as_sf(bl_sp)
 # transform to UTM zone 33
 germany.sf <- st_transform(germany.sf, crs = crs)
 # dissolve data

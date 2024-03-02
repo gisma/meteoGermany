@@ -1,22 +1,22 @@
-get_cl_data <- function(l)
-{
-
-  urls <- selectDWD(id = lki[l], res="daily", var="kl", per=type)#, outvec=TRUE)
-  clims <- dataDWD(urls, varnames=FALSE, dir=envrmt$path_GhcnDaily)
-  climdata <- clims[c("STATIONS_ID","MESS_DATUM","RSK","SDK","NM","VPM","PM","TMK","UPM","TXK","TNK","TGK")]
-  return(climdata)
-
-}
-
-get_climdata <- function(l,var="pressure",res ="hourly",col="P")
-{
-  
-  urls <- selectDWD(id = lki[l], res=res, var=var, per=type)#, outvec=TRUE)
-  clims <- dataDWD(urls, varnames=FALSE, dir=envrmt$path_GhcnDaily)
-  climdata <- clims[c("STATIONS_ID","MESS_DATUM",col)]
-  return(climdata)
-  
-}
+# get_cl_data <- function(l)
+# {
+# 
+#   urls <- selectDWD(id = lki[l], res="daily", var="kl", per=type)#, outvec=TRUE)
+#   clims <- dataDWD(urls, varnames=FALSE, dir=envrmt$path_GhcnDaily)
+#   climdata <- clims[c("STATIONS_ID","MESS_DATUM","RSK","SDK","NM","VPM","PM","TMK","UPM","TXK","TNK","TGK")]
+#   return(climdata)
+# 
+# }
+# 
+# get_climdata <- function(l,var="pressure",res ="hourly",col="P")
+# {
+#   
+#   urls <- selectDWD(id = lki[l], res=res, var=var, per=type)#, outvec=TRUE)
+#   clims <- dataDWD(urls, varnames=FALSE, dir=envrmt$path_GhcnDaily)
+#   climdata <- clims[c("STATIONS_ID","MESS_DATUM",col)]
+#   return(climdata)
+#   
+# }
 
 #'
 #' Partly the code is taken from

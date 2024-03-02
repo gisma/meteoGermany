@@ -15,7 +15,8 @@
 library(envimaR)
 library(rprojroot)
 append
-appendProjectDirList = c("data/data_lev0/GhcnDaily",
+appendProjectDirList = c("data/data_lev0/CDC_KL",
+                         "data/data_lev0/GhcnDaily",
                          "data/data_lev0/GhcnMonthly")
 root_folder = find_rstudio_root_file()
 source(file.path(root_folder, "src/functions/000_setup.R"))
@@ -35,6 +36,7 @@ minStations = 15       # minimum number of accepted stations
 calc_commu = TRUE
 calc_bl = FALSE #calculate one Bundesland only 
 bl = "Hessen"    # Bundesland to calculate
+PM =FALSE
 # param = "SDK" #c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","PM ")
 
 # ---- prepare auxiliary data----
@@ -130,7 +132,7 @@ for (cVar in c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","P
       
     }
     print(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))
-  }, mc.cores = 10, mc.allow.recursive = TRUE)
+  }, mc.cores = 8, mc.allow.recursive = TRUE)
 }
 
 # final correction and extraction per community

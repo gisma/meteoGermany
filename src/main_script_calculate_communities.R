@@ -17,7 +17,8 @@ if (calc_bl & !dir.exists(paste0(envrmt$path_data_lev2,bl,cVar)))
   dir.create(file.path(envrmt$path_data_lev2,bl,cVar),recursive = TRUE)
 
 matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
-  #if (!file.exists(file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")))){
+  #for (i in seq_along(clim_files)){
+  if (!file.exists(file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")))){
     if (cVar == "SDK") {
       correct_daytime(fn=clim_files[i])
       dig = 3
@@ -64,12 +65,12 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
   if (calc_bl) 
   {  
     # Calculate data frame of min and max precipitation for all months
-    var <- cbind(bl_sf, exactextractr::exact_extract(current, bl_sf, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
-    var$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
-    vr=st_drop_geometry(var[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
+    stat_vars <- cbind(bl_sf, exactextractr::exact_extract(current, bl_sf, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
+    stat_vars$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
+    vr=st_drop_geometry(stat_vars[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
       mutate_if(is.numeric, round, digits=dig)
-    var_fin=sjmisc::replace_columns(var,vr)
-    #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
+    var_fin=sjmisc::replace_columns(stat_vars,vr)
+    #saveRDS(stat_vars,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
     data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,bl,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
     current = terra::mask(current, bl_sf)
     current = terra::crop(current,bl_sf)
@@ -79,18 +80,20 @@ matrix_of_sums <- parallel::mclapply( seq_along(clim_files), function(i){
   }
     if (calc_commu){
     # Calculate data frame of min and max precipitation for all months
-    var <- cbind(gemeinden_sf_3035, exactextractr::exact_extract(raster::raster(clim_files[i]), gemeinden_sf_3035, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
-    var$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
+    stat_vars <- cbind(gemeinden_sf_3035, exactextractr::exact_extract(raster::raster(clim_files[i]), gemeinden_sf_3035, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
+    stat_vars$date = substr(tools::file_path_sans_ext(basename(clim_files[i])),1,10)
     #c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority","variance","stdev","coefficient_of_variation")
-    vr=st_drop_geometry(var[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
+    vr=st_drop_geometry(stat_vars[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
       mutate_if(is.numeric, round, digits=dig)
-    var_fin=sjmisc::replace_columns(var,vr)
-    #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
+    var_fin=sjmisc::replace_columns(stat_vars,vr)
+    print(i)
+    print(var_fin)
+    #saveRDS(stat_vars,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
     data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
     }
   
-    #}
-}, mc.cores = 12, mc.allow.recursive = TRUE)
+    }
+}, mc.cores = 16, mc.allow.recursive = TRUE)
 
 if (calc_bl)
   system(paste0("head -n 1 ",envrmt$path_data_lev2,"/",bl,cVar,"/2003-01-01_",cVar,".csv > ",envrmt$path_data_lev2,"/",bl,cVar,"/",cVar,"_2003-2021.out && tail -n+2 -q ",envrmt$path_data_lev2,"/",cVar,"/*",cVar,".csv >> ",envrmt$path_data_lev2,"/",bl,cVar,"/",bl,cVar,"_2003-2021.out"),intern =F)

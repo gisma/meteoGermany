@@ -37,7 +37,7 @@ calc_commu = TRUE
 calc_bl = FALSE #calculate one Bundesland only 
 bl = "Hessen"    # Bundesland to calculate
 PM =FALSE
-# param = "SDK" #c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","PM ")
+ param = "TMK" #c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","PM ")
 
 # ---- prepare auxiliary data----
 source(file.path(envrmt$path_src,"prepare_climate_aux_data.R"))
@@ -45,8 +45,8 @@ source(file.path(envrmt$path_src,"prepare_climate_aux_data.R"))
 # ---- start processing ----
 
 for (cVar in c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","PM ") ){
-  param=cVar
-  # extract the current param of the climate data set
+  cVar = param
+  # extract the urrent param of the climate data set
   #source(file.path(envrmt$path_src,"extract_climate_data.R"))
   cVar.sf = ex_clim(startDate=startDate,endDate=endDate,reso=reso,var=var,
                     type=type,param=param)
@@ -56,7 +56,7 @@ for (cVar in c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","P
   
   # perform the interpolation
   matrix_of_sums <- parallel::mclapply( seq_along(dat_list), function(n){
-    #for (n in seq_along(dat_list)) {
+   # for (n in seq_along(dat_list)) {
     currentDate = dat_list[n]
     if (as.Date(currentDate) >= as.Date(startDate) & as.Date(currentDate) <= as.Date(endDate)){
       cd= substr(currentDate,1,10)
@@ -102,7 +102,7 @@ for (cVar in c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","P
         data <- dat %>% drop_na()
         #print(data)
         #print(paste(sum(!is.na(data$RSK)), " valid Stations"))
-        if (sum(!is.na(data$SDK))>minStations){
+        if (sum(!is.na(data[cVar]))>minStations){
           data <- dplyr::distinct(data, geometry, .keep_all = TRUE)
           if (PM) {data = st_as_sf(data, crs = st_crs(dem))
           } else {
@@ -132,7 +132,7 @@ for (cVar in c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","P
       
     }
     print(paste0(envrmt$path_data_lev1,"/",cVar,"/",cd,"_",cVar,".tif"))
-  }, mc.cores = 8, mc.allow.recursive = TRUE)
+  }, mc.cores = 12, mc.allow.recursive = TRUE)
 }
 
 # final correction and extraction per community

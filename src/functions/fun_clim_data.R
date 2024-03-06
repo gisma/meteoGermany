@@ -51,7 +51,7 @@ ex_clim = function(startDate=NULL,endDate=NULL,reso=NULL,var=NULL,type=NULL,para
       fileIndex$var==var &
       fileIndex$per==type         , "path" ]
   
-  localfiles <- dataDWD(links, joinbf=TRUE, sleep=0.2, read=FALSE,dir=envrmt$path_run)
+  localfiles <- dataDWD(links, joinbf=TRUE, sleep=0.2, read=FALSE,dir=envrmt$path_CDC_KL)
   localfiles = localfiles[file.exists(localfiles)]
   
   # extract station ids 

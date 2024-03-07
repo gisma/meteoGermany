@@ -70,7 +70,7 @@ root_folder = envimaR::alternativeEnvi(root_folder = root_folder,
 
 if (!exists("fcts_folder")) {
   message("variable fcts_folder is NOT defined by calling script...\n 'src/functions/' is set as default\n")
-  fcts_folder =  paste0(root_folder,"/src/functions/")
+  fcts_folder =  paste0(root_folder,"/src/function/")
 }
 
 # append additional folders if defined by calling script
@@ -93,7 +93,7 @@ envrmt = envimaR::createEnvi(root_folder = root_folder,
 ## set temp path to speed up raster package operations
 raster::rasterOptions(tmpdir = envrmt$path_tmp)
 # suppres gdal warnings
-rgdal::set_thin_PROJ6_warnings(TRUE)
+#rgdal::set_thin_PROJ6_warnings(TRUE)
 
 # define some color palettes
 mvTop = mapview::mapviewPalette("mapviewTopoColors")

@@ -14,7 +14,7 @@
 #devtools::install_github("envima/envimaR")
 library(envimaR)
 library(rprojroot)
-append
+
 appendProjectDirList = c("data/data_lev0/CDC_KL",
                          "data/data_lev0/GhcnDaily",
                          "data/data_lev0/GhcnMonthly")
@@ -31,7 +31,7 @@ type= "historical"    #c("historical","recent") # recent means rolling the last 
 var = "kl" # pressure
 reso = "daily"
 downloadDEM = FALSE        # download and prepare DEM data (only needed once)
-#getClimate = TRUE   # download climate data (usually only done once)
+getClimate = TRUE   # download climate data (usually only done once)
 minStations = 15       # minimum number of accepted stations
 calc_commu = TRUE
 calc_bl = FALSE #calculate one Bundesland only 
@@ -40,7 +40,7 @@ PM =FALSE
  param = "TMK" #c("RSK", "SDK",  "NM", "UPM",  "TXK",  "TNK", "TMK", "TGK","VPM","PM ")
 
 # ---- prepare auxiliary data----
-source(file.path(envrmt$path_src,"prepare_climate_aux_data.R"))
+source(file.path(envrmt$path_src,"/helper/clim_helper_script_prepare_climate_aux_data.R"))
 
 # ---- start processing ----
 

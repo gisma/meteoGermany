@@ -43,7 +43,7 @@ The pipeline enables:
 
 - Hengl, T., Heuvelink, G.B.M., & Stein, A. (2003).  
   *Comparison of kriging with external drift and regression-kriging.*  
-  ITC Technical Note. Available: [http://www.itc.nl/library/Academic_output/](http://www.itc.nl/library/Academic_output/)
+  ITC Technical Note. Available: [https://ris.utwente.nl/ws/portalfiles/portal/448469781/hengl_comparison.pdf](https://ris.utwente.nl/ws/portalfiles/portal/448469781/hengl_comparison.pdf)
 
 - Pebesma, E.J. (2006).  
   *The gstat package.* Computers & Geosciences, 30(7), 683–691.  

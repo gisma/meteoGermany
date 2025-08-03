@@ -29,7 +29,7 @@
 #' @references
 #' Hengl, T., Heuvelink, G.B.M., & Stein, A. (2003). 
 #' \emph{Comparison of kriging with external drift and regression-kriging}. 
-#' ITC technical note. Available online at \url{http://www.itc.nl/library/Academic_output/}
+#' ITC technical note. Available online at \url{https://ris.utwente.nl/ws/portalfiles/portal/448469781/hengl_comparison.pdf}
 #'
 #' Pebesma, E.J. (2006). 
 #' \emph{The gstat package}. Computers & Geosciences, 30(7), 683–691. 

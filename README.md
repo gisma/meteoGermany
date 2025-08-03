@@ -54,7 +54,7 @@ The pipeline enables:
 This work integrates and extends ideas from:
 
 - Hartmann, K., Krois, J., Waske, B. (2018): **E-Learning Project SOGA**, FU Berlin  
-  [https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/time-series-analysis/index.html](https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/time-series-analysis/index.html)
+  [https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html](https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html)
 
 - Documentation of the `rdwd` package  
   [https://bookdown.org/brry/rdwd/](https://bookdown.org/brry/rdwd/)

@@ -32,6 +32,15 @@ The pipeline enables:
 
 ## References
 
+- Dolinar, M. (2006).  
+  *Spatial interpolation of sunshine duration in Slovenia.* Meteorological Applications, 13: 375–384.  
+  [https://doi.org/10.1017/S1350482706002362](https://doi.org/10.1017/S1350482706002362)
+
+- Hofstra, N., Haylock, M., New, M., & Jones, P.D. (2009).  
+  *Testing E-OBS European high-resolution gridded data set of daily precipitation and surface temperature.*  
+  J. Geophys. Res., 114, D21101.  
+  [https://doi.org/10.1029/2009JD011799](https://doi.org/10.1029/2009JD011799)
+
 - Hengl, T., Heuvelink, G.B.M., & Stein, A. (2003).  
   *Comparison of kriging with external drift and regression-kriging.*  
   ITC Technical Note. Available: [http://www.itc.nl/library/Academic_output/](http://www.itc.nl/library/Academic_output/)
@@ -40,24 +49,17 @@ The pipeline enables:
   *The gstat package.* Computers & Geosciences, 30(7), 683–691.  
   [https://doi.org/10.1016/j.cageo.2004.03.012](https://doi.org/10.1016/j.cageo.2004.03.012)
 
-- Hofstra, N., Haylock, M., New, M., & Jones, P.D. (2009).  
-  *Testing E-OBS European high-resolution gridded data set of daily precipitation and surface temperature.*  
-  J. Geophys. Res., 114, D21101.  
-  [https://doi.org/10.1029/2009JD011799](https://doi.org/10.1029/2009JD011799)
 
-- Dolinar, M. (2006).  
-  *Spatial interpolation of sunshine duration in Slovenia.* Meteorological Applications, 13: 375–384.  
-  [https://doi.org/10.1017/S1350482706002362](https://doi.org/10.1017/S1350482706002362)
 
 ## Credits
 
 This work integrates and extends ideas from:
+- Documentation of the `rdwd` package  
+  [https://bookdown.org/brry/rdwd/](https://bookdown.org/brry/rdwd/)
 
 - Hartmann, K., Krois, J., Rudolph, A. (2023): Statistics and Geodata Analysis using R (SOGA-R). Department of Earth Sciences, Freie Universitaet Berlin.  
   [https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html](https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html)
 
-- Documentation of the `rdwd` package  
-  [https://bookdown.org/brry/rdwd/](https://bookdown.org/brry/rdwd/)
 
 ---
 

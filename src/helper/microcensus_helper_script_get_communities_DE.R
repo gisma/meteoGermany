@@ -1,8 +1,14 @@
-#' Main control script
-#'
-#' @description Use this script for controlling the processing.
-#'
-#' @author [name], [email@com]
+#' Main control script to prepare official boundary data for Germany.
+#' 
+#' Downloads and processes:
+#' - NUTS3 geometries (Eurostat)
+#' - Municipality boundaries (VG250 from BKG)
+#' - NUTS–LAU mapping (Eurostat)
+#' - Official municipality names (Destatis)
+#' 
+#' Outputs are saved as RDS and used for spatial aggregation, masking, or linking external datasets.
+#' CRS is set to EPSG:3035 (ETRS89 / LAEA Europe).
+
 
 #devtools::install_github("envima/envimaR")
 library(envimaR)

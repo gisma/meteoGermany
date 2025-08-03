@@ -70,7 +70,7 @@ root_folder = envimaR::alternativeEnvi(root_folder = root_folder,
 
 if (!exists("fcts_folder")) {
   message("variable fcts_folder is NOT defined by calling script...\n 'src/functions/' is set as default\n")
-  fcts_folder =  paste0(root_folder,"/src/function/")
+  fcts_folder =  paste0(root_folder,"/src/functions/")
 }
 
 # append additional folders if defined by calling script

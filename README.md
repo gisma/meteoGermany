@@ -1,6 +1,4 @@
-# meteoGermany
-
-# Climate Interpolation Pipeline
+# meteoGermany - climate  data interpolation pipeline
 
 This project implements a robust, reproducible pipeline in R for spatial interpolation of daily climate variables using Kriging with external drift (elevation). It is designed for high-resolution gridding of climate parameters from station data across Germany or its subregions.
 

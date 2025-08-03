@@ -1,4 +1,4 @@
-# meteoGermany - climate  data interpolation pipeline
+# meteoGermany – climate data interpolation pipeline
 
 This project implements a robust, reproducible pipeline in R for spatial interpolation of daily climate variables using Kriging with external drift (elevation). It is designed for high-resolution gridding of climate parameters from station data across Germany or its subregions.
 
@@ -28,6 +28,32 @@ The pipeline enables:
 - Raster output with optional masking and classification
 - Statistical summarization using `exactextractr`
 
+## Kriging with External Drift: Strengths and Limitations
+
+### Advantages
+
+- Robust to **temporal variability** in station coverage over long periods (e.g., 30+ years)
+- Integrates **DEM-based elevation** as an auxiliary predictor without requiring dense spatial coverage
+- Offers **physically interpretable spatial gradients**, e.g. lapse rates in temperature
+- Supports **parallelized interpolation** of daily fields across large domains
+- Handles **sparse or irregular networks** better than simple interpolation methods
+
+### Limitations
+
+- May **underperform in areas with local microclimatic effects** (e.g., urban heat islands, complex canopy or land use structure)
+- Sensitive to **non-stationarity** or **heteroskedasticity** in input data
+- External drift relies on **static covariates** — local weather phenomena might need dynamic or multi-scale inputs
+- Assumes a **linear relationship** between covariate (elevation) and target variable — not always valid (e.g., inversions)
+
+### Relevance to This Pipeline
+
+The current pipeline implements a **generalized, robust KED setup** that works well across most of Germany. While not optimized for all microclimates, its simplicity and reproducibility make it highly effective for:
+
+- **National-scale climatology**
+- **Retrospective gridding** across decades
+- **Administrative-scale aggregation** (e.g., Gemeinde, Bundesland)
+- Fast, daily **reanalysis-like generation** with minimal tuning
+
 ## References
 
 - Dolinar, M. (2006).  
@@ -47,20 +73,18 @@ The pipeline enables:
   *The gstat package.* Computers & Geosciences, 30(7), 683–691.  
   [https://doi.org/10.1016/j.cageo.2004.03.012](https://doi.org/10.1016/j.cageo.2004.03.012)
 
-
-
 ## Credits
 
 This work integrates and extends ideas from:
+
 - Documentation of the `rdwd` package  
   [https://bookdown.org/brry/rdwd/](https://bookdown.org/brry/rdwd/)
 
-- Hartmann, K., Krois, J., Rudolph, A. (2023): Statistics and Geodata Analysis using R (SOGA-R). Department of Earth Sciences, Freie Universitaet Berlin.  
+- Hartmann, K., Krois, J., Rudolph, A. (2023): Statistics and Geodata Analysis using R (SOGA-R). Department of Earth Sciences, Freie Universität Berlin  
   [https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html](https://www.geo.fu-berlin.de/en/v/soga-r/Advances-statistics/Time-series-analysis/index.html)
-
 
 ---
 
 **Author**: Chris Reudenbach  
-**License**: MIT  
+**License**: [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](http://creativecommons.org/licenses/by-sa/4.0/)  
 **Contact**: creuden@gmail.com

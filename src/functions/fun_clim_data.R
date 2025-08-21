@@ -102,10 +102,6 @@ ex_clim = function(startDate=NULL,endDate=NULL,reso=NULL,var=NULL,type=NULL,para
 }
 
 
-
-
-######
-
 #' Modern DWD Climate Data Extractor (robuste Version mit Cache, Filter und Export)
 #'
 #' @param startDate Startdatum (z. B. "2010-01-01")
@@ -117,10 +113,7 @@ ex_clim = function(startDate=NULL,endDate=NULL,reso=NULL,var=NULL,type=NULL,para
 #' @return sf-Objekt mit Messwerten
 #' @export
 ex_clim_new <- function(startDate, endDate, reso = "daily", var = "kl", type = "historical", param = "TMK") {
-  library(rvest)
-  library(sf)
-  library(data.table)
-  library(dplyr)
+
   
   message("::: Suche verfügbare DWD-Stationen :::")
   outname <- paste0(envrmt$path_CDC_KL, "/", gsub("-", "", startDate), "_", gsub("-", "", endDate), "_", param, ".gpkg")
@@ -248,8 +241,9 @@ ex_clim_new <- function(startDate, endDate, reso = "daily", var = "kl", type = "
   
   return(st_as_sf(merge_sf))
   }
-  
+  merge_sf = st_read(outname)
   message(paste("📁 Existierende Datei \n", outname, " \n wird verwendet"))
+  return(merge_sf)
 }
 
 #' Klassifiziere Kriging-Unsicherheit in Qualitätsstufen und speichere Raster
@@ -340,6 +334,284 @@ sanitize_climate_param <- function(sf_day, cVar, date = NULL) {
   
   sf_day$tmp <- x
   return(sf_day)
+}
+
+#' @title Prepare German Elevation and Boundary Data
+#'
+#' @description
+#' Downloads and processes DEM and administrative boundary data for Germany.
+#' The result is a ready-to-use elevation raster (`dem`) for kriging or spatial modeling, saved as `dem.rds`.
+#'
+#' @param envrmt A named list of project paths, e.g. from `envimaR::createEnv()`.
+#' @param bl Character: name of the federal state to extract (e.g. "Hessen").
+#' @param crs Coordinate reference system (e.g. EPSG code or `terra::crs` object).
+#' @param res Numeric: target grid resolution in meters (e.g. 500).
+#' @param downloadDEM Logical: if `TRUE`, downloads and processes SRTM DEM; if `FALSE`, loads existing file.
+#'
+#' @return A `stars` object representing the processed DEM.
+#' @export
+#'
+#' @author Chris Reudenbach
+#' @examples
+#' \dontrun{
+#' envrmt <- createEnv()
+#' dem <- prepare_DEM(envrmt, bl = "Hessen", crs = 3035, res = 500, downloadDEM = TRUE)
+#' }
+
+prepare_DEM <- function(envrmt, bl, crs, res = 500, downloadDEM = TRUE) {
+  message("::: Load boundary data via geodata :::")
+
+  
+  # Load administrative boundaries
+  germany <- geodata::gadm(country = "DEU", level = 1, path = tempdir())
+  germany.sf <- st_as_sf(germany)
+  germany.sf <- st_transform(germany.sf, crs = crs)
+  
+  # Filter selected state
+  bl_sp <- germany[germany$NAME_1 == bl, ]
+  bl_sf <- st_as_sf(bl_sp)
+  bl_sf <- st_transform(bl_sf, crs = crs)
+  
+  # Dissolve all DE states into a unified polygon
+  states_special <- c("Baden-Württemberg", "Nordrhein-Westfalen", "Hessen", "Bayern",
+                      "Niedersachsen", "Sachsen-Anhalt", "Rheinland-Pfalz", "Sachsen",
+                      "Mecklenburg-Vorpommern", "Schleswig-Holstein", "Brandenburg",
+                      "Thüringen", "Saarland", "Berlin", "Hamburg", "Bremen")
+  DE.states <- germany.sf[germany.sf$NAME_1 %in% states_special, ]
+  DE <- DE.states %>% group_by(NAME_1) %>% summarize()
+  
+  if (downloadDEM) {
+    message("::: Download and prepare SRTM elevation data :::")
+    de_4326 <- st_transform(DE, 4326)
+    st_write(de_4326, file.path(envrmt$path_data_lev0, "de_4326.shp"), delete_dsn = TRUE)
+    
+    download.url <- "https://opendem.info/downloads/srtm_germany_dtm.zip"
+    zipfile <- file.path(envrmt$path_data_lev0, "srtm_germany_dtm.zip")
+    download.file(download.url, zipfile, mode = "wb")
+    unzip(zipfile, exdir = envrmt$path_data_lev0)
+    
+    srtm.germany <- terra::mask(
+      terra::rast(file.path(envrmt$path_data_lev0, "srtm_germany_dtm.tif")),
+      de_4326
+    )
+    
+    message("::: Create template raster :::")
+    grid.DE <- expand.grid(
+      x = seq(round(st_bbox(germany.sf)["xmin"]), round(st_bbox(germany.sf)["xmax"]), by = res),
+      y = seq(round(st_bbox(germany.sf)["ymin"]), round(st_bbox(germany.sf)["ymax"]), by = res)
+    )
+    coordinates(grid.DE) <- ~x + y
+    crs(grid.DE) <- crs
+    template_raster <- rasterFromXYZ(grid.DE, crs = crs)
+    
+    srtm.germany <- terra::project(srtm.germany, crs(template_raster))
+    srtm500 <- terra::resample(srtm.germany, rast(template_raster))
+    srtm500 <- round(srtm500, 0)
+    names(srtm500) <- "Stationshoehe"
+    
+    dem <- st_as_stars(srtm500)
+    saveRDS(dem, file.path(envrmt$path_data_lev0, "dem.rds"))
+    rm(srtm.germany, srtm500, template_raster, grid.DE)
+  }
+  
+  dem <- readRDS(file.path(envrmt$path_data_lev0, "dem.rds"))
+  return(dem)
+}
+
+# ---- Define reusable classification logic ----
+classify_raster_by_cVar <- function(cVar, rast) {
+  ranges <- list(
+    PM  = c(0, 954.9, 954.9, 1060.6, 99999, 1060.6),
+    UPM = c(-999, 0, 0, 100, 99999, 100),
+    TXK = c(-999, -46, -46, 42, 99999, 42),
+    TMK = c(-999, -46, -46, 42, 99999, 42),
+    TNK = c(-999, -46, -46, 42, 99999, 42),
+    NM  = c(-1000, 0, 0, 8, 99999, 8),
+    RSK = c(-1000, 0, 0, 312, 99999, 312)
+  )
+  if (cVar %in% names(ranges)) {
+    m <- matrix(ranges[[cVar]], ncol = 3, byrow = TRUE)
+    return(terra::classify(rast, m, include.lowest = TRUE))
+  } else {
+    return(rast)
+  }
+}
+
+
+# ---- CSV export helper ----
+write_stat_csv <- function(sf_df, file,dig) {
+  df <- st_drop_geometry(sf_df)
+  numeric_cols <- sapply(df, is.numeric)
+  df[numeric_cols] <- lapply(df[numeric_cols], round, digits = dig)
+  var_fin <- sjmisc::replace_columns(sf_df, df)
+  data.table::fwrite(st_drop_geometry(var_fin), file = file, dec = ".")
+}
+
+correct_daytime = function(fn){
+  for (f in fn){
+    current = terra::rast(f)
+    dt=suncalc::getSunlightTimes(date = as.Date(substr(basename(f),1,10)), lat = 51.0, lon = 9.0, tz = "UTC")
+    td=dt$sunset-dt$sunrise
+    maxDaylight= ceiling(as.numeric(unlist(stringr::str_split(td,"Time difference of "))))
+    m <- c(-999, 0,0, maxDaylight,99999,maxDaylight)
+    rclmat <- matrix(m, ncol=3, byrow=TRUE)
+    current <- terra::classify(current, rclmat, include.lowest=TRUE)
+    names(current) = xfun::sans_ext(basename(f))
+    if (calc_bl) 
+    {  
+      # Calculate data frame of min and max precipitation for all months
+      var <- cbind(bl_sf, exactextractr::exact_extract(terra::rast(f), bl_sf, c("min", "max","count","majority","median","quantile","minority","variance","stdev","coefficient_of_variation"),quantiles = c(0.1,0.2,0.3,0.4,0.6,0.7,0.8,0.25,0.5,0.75,0.9)))
+      var$date = substr(tools::file_path_sans_ext(basename(f)),1,10)
+      #c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority","variance","stdev","coefficient_of_variation")
+      vr=st_drop_geometry(var[,c("min",	"max",	"count",	"majority",	"median",	"q10",	"q20",	"q30",	"q40",	"q60",	"q70",	"q80",	"q25",	"q50",	"q75",	"q90",	"minority")]) %>%
+        mutate_if(is.numeric, round, digits=dig)
+      var_fin=sjmisc::replace_columns(var,vr)
+      #saveRDS(var,file.path(envrmt$path_data_lev2,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".rds")))
+      data.table::fwrite(st_drop_geometry(var_fin),file=file.path(envrmt$path_data_lev2,bl,cVar,paste0(tools::file_path_sans_ext(basename(clim_files[i])),".csv")),dec = ".")
+      current = terra::mask(raster::raster(f), bl_sf)
+      current = terra::crop(current,bl_sf)
+      raster::writeRaster(current,file.path(envrmt$path_data_lev1,bl,cVar,paste0(bl,basename(f))),overwrite=TRUE)
+    }  else {
+      writeRaster(current, f,gdal=c("COMPRESS=NONE"),overwrite=TRUE)
+    }
+  }
+}
+
+#' @title Extraction of Climate Raster Statistics by Community or Federal State
+#'
+#' @description
+#' Performs zonal statistics on daily interpolated climate raster data per administrative unit
+#' (either municipalities or federal states). Includes:
+#' \itemize{
+#'   \item Classification of physically implausible values (value capping)
+#'   \item Efficient extraction of descriptive statistics using \code{exactextractr}
+#'   \item Optional masking and clipping of raster data to federal states
+#'   \item Export of individual \code{.csv} statistics per day and merged outputs
+#' }
+#'
+#' Raster values are processed for a given climate variable (e.g., temperature, precipitation).
+#' The workflow supports both municipality-level and state-level statistics, controlled via
+#' \code{calc_commu} and \code{calc_bl}.
+#'
+#' @param cVar [character] name of the climate variable (e.g., "TMK", "RSK")
+#' @param envrmt [list] project environment list with standardized paths
+#' @param calc_commu [logical] whether to compute municipality-level stats
+#' @param calc_bl [logical] whether to compute federal state (BL) stats
+#' @param bl [character] short name of Bundesland (e.g., "Hessen")
+#' @param gemeinden_sf_3035 [sf] polygon layer of all municipalities in EPSG:3035
+#' @param bl_sf [sf] polygon layer of one federal state (if \code{calc_bl = TRUE})
+#' @param common_quantiles [numeric] quantiles used for descriptive statistics
+#' @param dig [integer] numeric rounding precision for each variable
+#'
+#' @return
+#' Creates daily `.csv` files per administrative unit containing statistical summaries.
+#' Also exports clipped raster files for BL-level analysis and concatenated `.out` tables
+#' across all days.
+#'
+#' @author
+#' Chris Reudenbach, \email{creuden@@gmail.com}
+extract_climate_statistics <- function(cVar,
+                                       envrmt,
+                                       calc_commu = TRUE,
+                                       calc_bl = FALSE,
+                                       bl = NULL,
+                                       gemeinden_sf_3035,
+                                       bl_sf = NULL,
+                                       common_quantiles = c(0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.25, 0.5, 0.75, 0.9),
+                                       dig = 1) {
+  
+  # Read climate files
+  clim_files <- sort(list.files(file.path(envrmt$path_data_lev1, cVar), pattern = paste0("*", cVar, "\\.tif$"), full.names = TRUE))
+  
+  # Create output directories
+  dir.create(file.path(envrmt$path_data_lev2, cVar), recursive = TRUE, showWarnings = FALSE)
+  if (calc_bl) {
+    dir.create(file.path(envrmt$path_data_lev1, bl, cVar), recursive = TRUE, showWarnings = FALSE)
+    dir.create(file.path(envrmt$path_data_lev2, bl, cVar), recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  # Loop over climate raster files
+  parallel::mclapply(seq_along(clim_files), function(i) {
+   # for (i in seq_along(clim_files)) {   
+    outfile_commu <- file.path(envrmt$path_data_lev2, cVar, paste0(tools::file_path_sans_ext(basename(clim_files[i])), ".csv"))
+    #if (file.exists(outfile_commu)) return(NULL)
+    
+    if (cVar == "SDK") {
+      correct_daytime(fn = clim_files[i])
+     # return(NULL)
+    }
+    
+    current <- terra::rast(clim_files[i])
+    current <- classify_raster_by_cVar(cVar, current)
+    names(current) <- xfun::sans_ext(basename(clim_files[i]))
+    dig <- ifelse(cVar %in% c("PM", "TXK", "TMK", "TNK", "NM", "RSK"), 1, 0)
+    
+    if (calc_bl) {
+      stat_vars <- cbind(
+        bl_sf,
+        exactextractr::exact_extract(current, bl_sf,
+                                     c("min", "max", "count", "majority", "median", "quantile", "minority", "variance", "stdev", "coefficient_of_variation"),
+                                     quantiles = common_quantiles)
+      )
+      stat_vars$date <- substr(tools::file_path_sans_ext(basename(clim_files[i])), 1, 10)
+      
+      out_bl_file <- file.path(envrmt$path_data_lev2, bl, cVar, paste0(tools::file_path_sans_ext(basename(clim_files[i])), ".csv"))
+      write_stat_csv(stat_vars, out_bl_file,dig)
+      
+      masked <- terra::mask(current, bl_sf)
+      cropped <- terra::crop(masked, bl_sf)
+      raster::writeRaster(cropped, file.path(envrmt$path_data_lev1, bl, cVar, paste0(bl, basename(clim_files[i]))), overwrite = TRUE)
+    }
+    
+    if (calc_commu) {
+      stat_vars <- cbind(
+        gemeinden_sf_3035,
+        exactextractr::exact_extract(current, gemeinden_sf_3035,
+                                     c("min", "max", "count", "majority", "median", "quantile", "minority", "variance", "stdev", "coefficient_of_variation"),
+                                     quantiles = common_quantiles)
+      )
+      stat_vars$date <- substr(tools::file_path_sans_ext(basename(clim_files[i])), 1, 10)
+      write_stat_csv(stat_vars, outfile_commu,dig)
+    }
+    
+  }, mc.cores = 16, mc.allow.recursive = TRUE)
+  #} 
+  # Merge CSV outputs
+  if (calc_bl) {
+    system(paste0("head -n 1 ", envrmt$path_data_lev2, "/", bl, cVar, "/2003-01-01_", cVar, ".csv > ",
+                  envrmt$path_data_lev2, "/", bl, cVar, "/", bl, cVar, "_2003-2021.out && tail -n+2 -q ",
+                  envrmt$path_data_lev2, "/", bl, cVar, "/*", cVar, ".csv >> ",
+                  envrmt$path_data_lev2, "/", bl, cVar, "/", bl, cVar, "_2003-2021.out"), intern = FALSE)
+  }
+  if (calc_commu) {
+    # system(paste0("head -n 1 ", envrmt$path_data_lev2, "/", cVar, "/2003-01-01_", cVar, ".csv > ",
+    #               envrmt$path_data_lev2, "/", cVar, "/", cVar, "_2003-2021.out && tail -n+2 -q ",
+    #               envrmt$path_data_lev2, "/", cVar, "/*", cVar, ".csv >> ",
+    #               envrmt$path_data_lev2, "/", cVar, "/", cVar, "_2003-2021.out"), intern = FALSE)
+    # Dynamisch Start- und Enddatum aus Dateinamen ableiten
+    dates <- substr(tools::file_path_sans_ext(basename(clim_files)), 1, 10)
+    start_date <- min(dates)
+    end_date <- max(dates)
+    
+    # Ausgabedateinamen generieren
+    merged_file_bl <- file.path(envrmt$path_data_lev2, bl, cVar, paste0(bl, cVar, "_", start_date, "-", end_date, ".out"))
+    merged_file_commu <- file.path(envrmt$path_data_lev2, cVar, paste0(cVar, "_", start_date, "-", end_date, ".out"))
+    
+    # Zusammenführen für BL
+    if (calc_bl) {
+      first_file_bl <- file.path(envrmt$path_data_lev2, bl, cVar, paste0(start_date, "_", cVar, ".csv"))
+      system(paste0("head -n 1 ", first_file_bl, " > ", merged_file_bl, 
+                    " && tail -n+2 -q ", envrmt$path_data_lev2, "/", bl, cVar, "/*", cVar, ".csv >> ", merged_file_bl))
+    }
+    
+    # Zusammenführen für Gemeinden
+    if (calc_commu) {
+      first_file_commu <- file.path(envrmt$path_data_lev2, cVar, paste0(start_date, "_", cVar, ".csv"))
+      system(paste0("head -n 1 ", first_file_commu, " > ", merged_file_commu, 
+                    " && tail -n+2 -q ", envrmt$path_data_lev2, "/", cVar, "/*", cVar, ".csv >> ", merged_file_commu))
+    }
+    
+  }
 }
 
   

@@ -12,7 +12,11 @@
 require(envimaR)
 
 # basic packages
-packagesToLoad = c("mapview",  "raster", "stars", "sf","dplyr","tidyverse","lubridate","rdwd","dismo","gstat","viridis","automap","geodata","downloader","dplyr","readr","doParallel")
+packagesToLoad <- c(
+  "automap", "data.table", "dplyr", "envimaR", "exactextractr", "geodata", "gstat",
+  "parallel", "pbmcapply", "raster", "rdwd", "rprojroot", "rvest", "sf", "sjmisc",
+  "stars", "stringr", "suncalc", "terra", "tools", "xfun", "xml2","tidyr"
+)
 
 
 # mandantory folder structure
@@ -98,7 +102,7 @@ raster::rasterOptions(tmpdir = envrmt$path_tmp)
 # define some color palettes
 mvTop = mapview::mapviewPalette("mapviewTopoColors")
 mvSpec = mapview::mapviewPalette("mapviewSpectralColors")
-mvVec =	 mapview::mapviewPalette("mapviewVectorColors")
+mvVec =	 mapview::mapviewPalette("mapviewVec torColors")
 mvRas =	 mapview::mapviewPalette("mapviewRasterColors")
 
 crs = raster::crs("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")
